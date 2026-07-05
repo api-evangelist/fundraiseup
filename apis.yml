@@ -1,0 +1,166 @@
+aid: fundraiseup
+url: https://raw.githubusercontent.com/api-evangelist/fundraiseup/refs/heads/main/apis.yml
+name: Fundraise Up
+kind: company
+description: Fundraise Up is an online donation and fundraising platform for
+  nonprofits that optimizes the digital giving experience to increase conversion
+  and recurring revenue. Its REST API gives programmatic access to fundraising
+  data - donations, recurring plans, supporters (donors), and an events audit log
+  - so organizations can process offline and non-digital donations through their
+  Fundraise Up account, combine them with online giving, and sync everything to
+  CRMs, BI tools, and data warehouses. The API is resource-oriented, uses
+  JSON-encoded request bodies, and authenticates with an API key over HTTP Bearer.
+  Base URL is https://api.fundraiseup.com/v1.
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+tags:
+- Fundraising
+- Donations
+- Nonprofit
+- Payments
+- Recurring Giving
+- Donor Management
+created: '2026-07-05'
+modified: '2026-07-05'
+specificationVersion: '0.19'
+apis:
+- aid: fundraiseup:fundraiseup-donations-api
+  name: Fundraise Up Donations API
+  tags:
+  - Donations
+  - Payments
+  - Fundraising
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://api.fundraiseup.com/v1/docs/
+  baseURL: https://api.fundraiseup.com/v1
+  properties:
+  - url: https://fundraiseup.com/docs/rest-api/
+    type: Documentation
+  - url: https://api.fundraiseup.com/v1/docs/
+    type: APIReference
+  - url: openapi/fundraiseup-openapi.yml
+    type: OpenAPI
+  - url: collections/fundraiseup.postman_collection.json
+    type: PostmanCollection
+  - url: collections/fundraiseup.opencollection.json
+    type: OpenCollection
+  description: List, create, and retrieve one-time and recurring donations, including
+    donations collected outside the website (face-to-face, direct mail, telethons,
+    events) and ACH US Direct Debit donations. Donations can be updated only within
+    24 hours of creation. Listing uses cursor-based pagination (limit, starting_after,
+    ending_before).
+- aid: fundraiseup:fundraiseup-recurring-plans-api
+  name: Fundraise Up Recurring Plans API
+  tags:
+  - Recurring Giving
+  - Subscriptions
+  - Donations
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://api.fundraiseup.com/v1/docs/
+  baseURL: https://api.fundraiseup.com/v1
+  properties:
+  - url: https://fundraiseup.com/docs/rest-api/
+    type: Documentation
+  - url: https://api.fundraiseup.com/v1/docs/
+    type: APIReference
+  - url: openapi/fundraiseup-openapi.yml
+    type: OpenAPI
+  - url: collections/fundraiseup.postman_collection.json
+    type: PostmanCollection
+  - url: collections/fundraiseup.opencollection.json
+    type: OpenCollection
+  description: List, create, and retrieve recurring donation plans that model a
+    supporter's ongoing giving schedule and terms. Like donations, recurring plans
+    can be updated only within 24 hours of creation. Plan lifecycle activity
+    (activated, scheduled, failed, completed, cancelled, paused, retrying) is
+    surfaced through the Events resource.
+- aid: fundraiseup:fundraiseup-supporters-api
+  name: Fundraise Up Supporters API
+  tags:
+  - Supporters
+  - Donors
+  - Donor Management
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://api.fundraiseup.com/v1/docs/
+  baseURL: https://api.fundraiseup.com/v1
+  properties:
+  - url: https://fundraiseup.com/docs/rest-api/
+    type: Documentation
+  - url: https://api.fundraiseup.com/v1/docs/
+    type: APIReference
+  - url: openapi/fundraiseup-openapi.yml
+    type: OpenAPI
+  - url: collections/fundraiseup.postman_collection.json
+    type: PostmanCollection
+  - url: collections/fundraiseup.opencollection.json
+    type: OpenCollection
+  description: List and retrieve supporters - the donor records that hold a giver's
+    profile and giving history. Supporters are the Fundraise Up term for donors.
+    Cursor-based pagination (limit, starting_after, ending_before) mirrors the other
+    list endpoints.
+- aid: fundraiseup:fundraiseup-events-api
+  name: Fundraise Up Events API
+  tags:
+  - Events
+  - Audit Log
+  - Sync
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://fundraiseup.com/support/api-event-types/
+  baseURL: https://api.fundraiseup.com/v1
+  properties:
+  - url: https://fundraiseup.com/support/api-event-types/
+    type: Documentation
+  - url: https://api.fundraiseup.com/v1/docs/
+    type: APIReference
+  - url: openapi/fundraiseup-openapi.yml
+    type: OpenAPI
+  - url: collections/fundraiseup.postman_collection.json
+    type: PostmanCollection
+  - url: collections/fundraiseup.opencollection.json
+    type: OpenCollection
+  description: List and retrieve audit-log events describing activity across
+    donations, transaction attempts, recurring plans, tributes, and supporters
+    (for example donation.success, recurring_plan.activated, supporter.updated).
+    Events are pulled over REST - Fundraise Up does not push native webhooks - so
+    consumers poll this resource to drive event-based syncing.
+- aid: fundraiseup:fundraiseup-donor-portal-access-links-api
+  name: Fundraise Up Donor Portal Access Links API
+  tags:
+  - Donor Portal
+  - Access Links
+  - Supporters
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://fundraiseup.com/docs/seamless-donor-portal/
+  baseURL: https://api.fundraiseup.com/v1
+  properties:
+  - url: https://fundraiseup.com/docs/seamless-donor-portal/
+    type: Documentation
+  - url: https://api.fundraiseup.com/v1/docs/
+    type: APIReference
+  - url: openapi/fundraiseup-openapi.yml
+    type: OpenAPI
+  - url: collections/fundraiseup.postman_collection.json
+    type: PostmanCollection
+  - url: collections/fundraiseup.opencollection.json
+    type: OpenCollection
+  description: Generate secure, single-use access links that let a supporter open
+    their Donor Portal - or a specific recurring plan within it - without logging
+    in, so a nonprofit can embed self-service donor management seamlessly into its
+    own platform.
+common:
+- type: LinkedIn
+  url: https://www.linkedin.com/company/fundraiseup
+- type: Website
+  url: https://fundraiseup.com
+- type: Documentation
+  url: https://fundraiseup.com/docs/
+- type: Plans
+  url: plans/fundraiseup-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/fundraiseup-rate-limits.yml
+- type: FinOps
+  url: finops/fundraiseup-finops.yml
+- url: https://fundraiseup.com/blog/
+  type: Blog
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

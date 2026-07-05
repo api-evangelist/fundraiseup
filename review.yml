@@ -1,0 +1,105 @@
+aid: fundraiseup
+name: Fundraise Up
+review:
+  question: Does Fundraise Up expose a documented public WebSocket API?
+  answer: false
+  date: '2026-07-05'
+  reviewer: API Evangelist
+  asyncapiSpecCreated: false
+  asyncapiScopeNote: |
+    No AsyncAPI document was authored. Fundraise Up's public developer surface is
+    request/response REST over HTTPS (base https://api.fundraiseup.com/v1),
+    authenticated with an API key via HTTP Bearer. There is no server-push
+    transport (WebSocket or SSE) on Fundraise Up's own API to model. The Events
+    resource is an audit log that is pulled over REST, not streamed - Fundraise Up
+    does not deliver native webhooks either; event-based syncing is handled by
+    polling the Events endpoint or by bridging through Zapier. There is a separate
+    browser-side JavaScript API for the donation checkout widget, but it is a
+    client-side DOM/event library, not a network WebSocket API.
+findings:
+  summary: |
+    Fundraise Up does not publish a documented public WebSocket API. Fundraise Up
+    is an online donation and fundraising platform for nonprofits. Its public REST
+    API (base https://api.fundraiseup.com/v1) is resource-oriented, accepts
+    JSON-encoded bodies with Content-Type application/json, and authenticates with
+    an API key using HTTP Bearer authorization. The documented resources are
+    Donations, Recurring Plans, Supporters (donors), and Events (an audit log),
+    plus Donor Portal access-link generation. All are plain request/response REST
+    over HTTPS. Listing uses cursor-based pagination (limit 1-100 default 10,
+    starting_after, ending_before). Donations and recurring plans can be created
+    and updated (updates only within 24 hours of creation); supporters and events
+    are read-only. No realtime, bidirectional, or streaming WebSocket (ws:// or
+    wss://) endpoint is documented anywhere on Fundraise Up's API as of the review
+    date.
+  accessModel: |
+    The REST API is available to Fundraise Up account holders. An API key is
+    created in the dashboard under Settings > API keys and passed as a Bearer
+    token. There is no separate API subscription fee - Fundraise Up's business
+    model is a platform fee taken as a percentage of processed donations
+    (4% standard, 5% for cryptocurrency), with no setup fees or contracts; payment
+    processor fees (Stripe, PayPal, Gemini) apply separately and are often covered
+    by donors.
+  webhooks: |
+    Fundraise Up does not expose configurable native webhooks that POST events to
+    an arbitrary customer URL. Event-based integration is done by polling the REST
+    Events resource (an audit log across donations, transaction attempts, recurring
+    plans, tributes, and supporters) or by using Zapier as an intermediary. This
+    is server-to-nowhere pull, not a WebSocket or server-push channel.
+  transports:
+    - protocol: REST
+      scheme: https
+      baseURL: https://api.fundraiseup.com/v1
+      documented: true
+      note: Resource-oriented JSON REST API authenticated with an API key over HTTP Bearer.
+    - protocol: Polling
+      scheme: https
+      documented: true
+      note: The Events resource is an audit log consumed by polling GET /v1/events. Client-initiated, not server push.
+    - protocol: WebSocket
+      scheme: wss
+      documented: false
+      note: No WebSocket endpoint is documented anywhere in Fundraise Up's REST API reference or developer docs as of the review date.
+  endpointsConfirmedRest:
+    - GET    https://api.fundraiseup.com/v1/donations
+    - POST   https://api.fundraiseup.com/v1/donations
+    - GET    https://api.fundraiseup.com/v1/donations/{id}
+    - POST   https://api.fundraiseup.com/v1/donations/{id}
+    - GET    https://api.fundraiseup.com/v1/recurring_plans
+    - POST   https://api.fundraiseup.com/v1/recurring_plans
+    - GET    https://api.fundraiseup.com/v1/recurring_plans/{id}
+    - POST   https://api.fundraiseup.com/v1/recurring_plans/{id}
+    - GET    https://api.fundraiseup.com/v1/supporters
+    - GET    https://api.fundraiseup.com/v1/supporters/{id}
+    - GET    https://api.fundraiseup.com/v1/events
+    - GET    https://api.fundraiseup.com/v1/events/{id}
+    - POST   https://api.fundraiseup.com/v1/donor_portal/access_links/supporters/{id}
+    - POST   https://api.fundraiseup.com/v1/donor_portal/access_links/recurring_plans/{id}
+sources:
+  - url: https://fundraiseup.com/docs/rest-api/
+    type: Documentation
+    note: REST API overview - base URL, API-key Bearer auth, JSON request bodies, 24-hour update window. Redirects to the hosted reference.
+  - url: https://api.fundraiseup.com/v1/docs/
+    type: APIReference
+    note: Hosted API reference (JS-rendered) for donations, recurring plans, supporters, and events. All HTTPS REST.
+  - url: https://fundraiseup.com/docs/rest-api-resources/
+    type: APIReference
+    note: Per-resource endpoint reference. Cursor pagination (limit, starting_after, ending_before).
+  - url: https://fundraiseup.com/support/api-event-types/
+    type: Documentation
+    note: Event-type catalog for the Events resource (donation.*, transaction_attempt.*, recurring_plan.*, tribute.*, supporter.*). Pulled, not pushed.
+  - url: https://fundraiseup.com/docs/changelog/ach-direct-debit-support-in-rest-api/
+    type: Documentation
+    note: ACH US Direct Debit donations via the existing donation creation endpoint using a Stripe Payment Method ID. Confirms base URL and version prefix.
+  - url: https://fundraiseup.com/pricing/
+    type: Pricing
+    note: 4% platform fee (5% crypto), no setup fees or contracts; processor fees separate. No per-API pricing.
+actions:
+  asyncapiPath: null
+  apisYmlUpdated: true
+  reason: |
+    No WebSocket protocol surface exists. Fundraise Up's own public API is
+    request/response REST (Donations, Recurring Plans, Supporters, Events, Donor
+    Portal access links), authenticated with an API key over HTTP Bearer. The
+    Events resource is an audit log consumed by polling, and Fundraise Up does not
+    deliver native webhooks, so there is no server-push transport (WebSocket or
+    SSE) on Fundraise Up's own API to model. No AsyncAPI document was created.

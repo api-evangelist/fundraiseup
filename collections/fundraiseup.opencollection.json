@@ -1,0 +1,169 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Fundraise Up REST API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{apiKey}}"
+    }
+  },
+  "items": [
+    {
+      "info": { "name": "Donations", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "List donations.", "type": "http" },
+          "http": { "method": "GET", "url": "https://api.fundraiseup.com/v1/donations?limit=10" },
+          "docs": "Retrieves donations with cursor-based pagination (limit, starting_after, ending_before)."
+        },
+        {
+          "info": { "name": "Create a donation.", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/donations",
+            "body": { "type": "json", "data": "{}" }
+          },
+          "docs": "Creates a one-time or recurring donation, including offline and ACH donations."
+        },
+        {
+          "info": { "name": "Retrieve a donation.", "type": "http" },
+          "http": {
+            "method": "GET",
+            "url": "https://api.fundraiseup.com/v1/donations/:id",
+            "params": [
+              { "name": "id", "value": "", "type": "path", "description": "The donation ID." }
+            ]
+          },
+          "docs": "Retrieves a donation by ID."
+        },
+        {
+          "info": { "name": "Update a donation.", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/donations/:id",
+            "params": [
+              { "name": "id", "value": "", "type": "path", "description": "The donation ID." }
+            ],
+            "body": { "type": "json", "data": "{}" }
+          },
+          "docs": "Updates a donation. Only permitted within 24 hours of creation."
+        }
+      ]
+    },
+    {
+      "info": { "name": "Recurring Plans", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "List recurring plans.", "type": "http" },
+          "http": { "method": "GET", "url": "https://api.fundraiseup.com/v1/recurring_plans?limit=10" },
+          "docs": "Retrieves recurring donation plans with cursor-based pagination."
+        },
+        {
+          "info": { "name": "Create a recurring plan.", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/recurring_plans",
+            "body": { "type": "json", "data": "{}" }
+          },
+          "docs": "Creates a recurring donation plan."
+        },
+        {
+          "info": { "name": "Retrieve a recurring plan.", "type": "http" },
+          "http": {
+            "method": "GET",
+            "url": "https://api.fundraiseup.com/v1/recurring_plans/:id",
+            "params": [
+              { "name": "id", "value": "", "type": "path", "description": "The recurring plan ID." }
+            ]
+          },
+          "docs": "Retrieves a recurring plan by ID."
+        },
+        {
+          "info": { "name": "Update a recurring plan.", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/recurring_plans/:id",
+            "params": [
+              { "name": "id", "value": "", "type": "path", "description": "The recurring plan ID." }
+            ],
+            "body": { "type": "json", "data": "{}" }
+          },
+          "docs": "Updates a recurring plan. Only permitted within 24 hours of creation."
+        }
+      ]
+    },
+    {
+      "info": { "name": "Supporters", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "List supporters.", "type": "http" },
+          "http": { "method": "GET", "url": "https://api.fundraiseup.com/v1/supporters?limit=10" },
+          "docs": "Retrieves supporters (donor records) with cursor-based pagination."
+        },
+        {
+          "info": { "name": "Retrieve a supporter.", "type": "http" },
+          "http": {
+            "method": "GET",
+            "url": "https://api.fundraiseup.com/v1/supporters/:id",
+            "params": [
+              { "name": "id", "value": "", "type": "path", "description": "The supporter ID." }
+            ]
+          },
+          "docs": "Retrieves a supporter by ID."
+        }
+      ]
+    },
+    {
+      "info": { "name": "Events", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "List events.", "type": "http" },
+          "http": { "method": "GET", "url": "https://api.fundraiseup.com/v1/events?limit=10" },
+          "docs": "Retrieves audit-log events across donations, recurring plans, tributes, and supporters."
+        },
+        {
+          "info": { "name": "Retrieve an event.", "type": "http" },
+          "http": {
+            "method": "GET",
+            "url": "https://api.fundraiseup.com/v1/events/:id",
+            "params": [
+              { "name": "id", "value": "", "type": "path", "description": "The event ID." }
+            ]
+          },
+          "docs": "Retrieves an event by ID."
+        }
+      ]
+    },
+    {
+      "info": { "name": "Donor Portal", "type": "folder" },
+      "items": [
+        {
+          "info": { "name": "Create a supporter access link.", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/donor_portal/access_links/supporters/:id",
+            "params": [
+              { "name": "id", "value": "", "type": "path", "description": "The supporter ID." }
+            ]
+          },
+          "docs": "Generates a secure link for a supporter to open their Donor Portal without logging in."
+        },
+        {
+          "info": { "name": "Create a recurring-plan access link.", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/donor_portal/access_links/recurring_plans/:id",
+            "params": [
+              { "name": "id", "value": "", "type": "path", "description": "The recurring plan ID." }
+            ]
+          },
+          "docs": "Generates a secure link for a supporter to access a specific recurring plan in the Donor Portal."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

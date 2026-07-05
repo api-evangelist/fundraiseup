@@ -1,0 +1,97 @@
+specification: FinOps Framework
+specificationVersion: '1.0'
+schema: https://www.finops.org/framework/
+provider: Fundraise Up
+providerId: fundraiseup
+created: '2026-07-05'
+modified: '2026-07-05'
+reconciled: false
+tags:
+- Fundraising
+- Donations
+- Nonprofit
+- Payments
+- FinOps
+- Cost Management
+- FOCUS
+description: >-
+  FinOps view of Fundraise Up spend. Fundraise Up charges no software license or
+  API fee; cost is a transaction-based platform fee taken as a percentage of each
+  processed donation - 4% standard and 5% for cryptocurrency - with no setup fees,
+  monthly fees, or contracts. Payment processor fees (Stripe, PayPal, Gemini) are
+  billed separately and stack on top of the platform fee. Because donors can elect
+  to cover fees at checkout, and most do, the organization's effective net cost is
+  frequently far below the headline percentage. Spend therefore scales directly
+  with fundraising volume rather than with API call counts.
+notes: >-
+  Exact percentages and nonprofit-discounted processor rates should be verified on
+  the pricing page during reconciliation. Fee coverage by donors materially lowers
+  effective cost and should be tracked as an offset.
+sources:
+- https://fundraiseup.com/pricing/
+- https://fundraiseup.com/support/pricing-faqs/
+- https://fundraiseup.com/support/tax-deductible-fees/
+- https://focus.finops.org/focus-specification/v1-3/
+alignedWith:
+  framework: FinOps Foundation Framework
+  frameworkUrl: https://www.finops.org/framework/
+  dataSpec: FOCUS
+  dataSpecVersion: '1.3'
+  dataSpecUrl: https://focus.finops.org/focus-specification/v1-3/
+publisherName: Fundraise Up
+serviceCategory: Fundraising and Payments
+billingModel:
+  pricingCategory: Usage-Based
+  billingFrequency: Per Transaction
+  billingCurrency: USD
+  chargeCategories:
+  - Usage
+  - Adjustment
+focusColumns:
+  ServiceName: Fundraise Up
+  ServiceCategory: Fundraising and Payments
+  ProviderName: Fundraise Up
+  PublisherName: Fundraise Up
+  InvoiceIssuerName: Fundraise Up
+  BillingCurrency: USD
+  ChargeCategory: Usage
+  PricingCategory: Usage-Based
+meters:
+- name: platform_fee
+  description: Percentage platform fee on each processed money donation (standard 4%).
+  unit: donation_amount
+  aggregation: sum
+  dimensions:
+  - account
+  - campaign
+- name: crypto_platform_fee
+  description: Percentage platform fee on each cryptocurrency donation (standard 5%).
+  unit: donation_amount
+  aggregation: sum
+  dimensions:
+  - account
+- name: processor_fee
+  description: Payment processor fees (Stripe, PayPal, Gemini) charged separately per transaction.
+  unit: donation_amount
+  aggregation: sum
+  dimensions:
+  - account
+  - processor
+- name: donor_covered_fees
+  description: Fees voluntarily covered by donors at checkout, offsetting the organization's net cost.
+  unit: donation_amount
+  aggregation: sum
+  dimensions:
+  - account
+principles:
+- name: Visibility
+  description: Track platform fee, processor fees, and donor-covered fees per campaign to see true net cost per dollar raised.
+- name: Allocation
+  description: Tag donations by campaign or program so fees map to internal cost centers and appeals.
+- name: Optimization
+  description: Encourage donor fee coverage and recurring giving to lower effective cost; reconcile processor rates against nonprofit discounts.
+- name: Accountability
+  description: Review monthly fees against funds raised; assign campaign owners responsible for cost-per-dollar-raised.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

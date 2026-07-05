@@ -1,0 +1,58 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
+provider: Fundraise Up
+providerId: fundraiseup
+created: '2026-07-05'
+modified: '2026-07-05'
+reconciled: false
+tags:
+- Fundraising
+- Donations
+- Nonprofit
+- Rate Limiting
+- Quotas
+description: >-
+  The Fundraise Up REST API enforces fixed request-rate limits of 8 requests per
+  second and 128 requests per minute. Requests that exceed either limit receive
+  an HTTP 429 Too Many Requests response. List endpoints additionally bound page
+  size through the limit query parameter, which accepts 1 to 100 records per page
+  (default 10) and is combined with cursor pagination via starting_after and
+  ending_before. A separate business rule constrains mutations rather than rate:
+  donations and recurring plans can be updated only within 24 hours of creation.
+notes: >-
+  Numeric limits reflect the documented values at the review date and should be
+  verified during reconciliation against the hosted API reference. Clients should
+  implement exponential backoff with jitter on 429 responses.
+sources:
+- https://fundraiseup.com/docs/rest-api/
+- https://api.fundraiseup.com/v1/docs/
+- https://fundraiseup.com/docs/rest-api-resources/
+responseCodes:
+  throttled: 429
+limits:
+- name: Requests Per Second
+  scope: account
+  metric: requests
+  limit: 8 per second
+  notes: Exceeding this returns HTTP 429 Too Many Requests.
+- name: Requests Per Minute
+  scope: account
+  metric: requests
+  limit: 128 per minute
+  notes: Exceeding this returns HTTP 429 Too Many Requests.
+- name: Page Size
+  scope: request
+  metric: records
+  limit: 1 to 100 (default 10)
+  notes: Controlled by the limit query parameter on list endpoints, combined with cursor pagination.
+policies:
+- name: Backoff Strategy
+  description: Clients should implement exponential backoff with jitter and honor Retry-After on 429 responses.
+- name: Cursor Pagination
+  description: List endpoints paginate with starting_after and ending_before cursors plus the limit page-size parameter.
+- name: 24-Hour Update Window
+  description: Donations and recurring plans can be updated only within 24 hours of creation; this is a business rule, not a rate limit.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

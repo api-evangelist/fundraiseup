@@ -1,0 +1,174 @@
+{
+  "info": {
+    "name": "Fundraise Up REST API",
+    "description": "Programmatic access to a nonprofit's Fundraise Up fundraising data: donations, recurring plans, supporters (donors), and an events audit log, plus Donor Portal access links. Base URL: https://api.fundraiseup.com/v1. Resource-oriented JSON REST authenticated with an API key (Settings > API keys) over HTTP Bearer. Donations and recurring plans can be updated only within 24 hours of creation. List endpoints use cursor pagination (limit, starting_after, ending_before).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{apiKey}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://api.fundraiseup.com/v1", "type": "string" },
+    { "key": "apiKey", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Donations",
+      "item": [
+        {
+          "name": "List donations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/donations?limit=10", "host": ["{{baseUrl}}"], "path": ["donations"], "query": [{ "key": "limit", "value": "10" }] },
+            "description": "Retrieves donations with cursor-based pagination (limit, starting_after, ending_before)."
+          }
+        },
+        {
+          "name": "Create a donation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/donations", "host": ["{{baseUrl}}"], "path": ["donations"] },
+            "description": "Creates a one-time or recurring donation, including offline and ACH donations."
+          }
+        },
+        {
+          "name": "Retrieve a donation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/donations/:id", "host": ["{{baseUrl}}"], "path": ["donations", ":id"], "variable": [{ "key": "id", "value": "" }] },
+            "description": "Retrieves a donation by ID."
+          }
+        },
+        {
+          "name": "Update a donation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/donations/:id", "host": ["{{baseUrl}}"], "path": ["donations", ":id"], "variable": [{ "key": "id", "value": "" }] },
+            "description": "Updates a donation. Only permitted within 24 hours of creation."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recurring Plans",
+      "item": [
+        {
+          "name": "List recurring plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/recurring_plans?limit=10", "host": ["{{baseUrl}}"], "path": ["recurring_plans"], "query": [{ "key": "limit", "value": "10" }] },
+            "description": "Retrieves recurring donation plans with cursor-based pagination."
+          }
+        },
+        {
+          "name": "Create a recurring plan",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/recurring_plans", "host": ["{{baseUrl}}"], "path": ["recurring_plans"] },
+            "description": "Creates a recurring donation plan."
+          }
+        },
+        {
+          "name": "Retrieve a recurring plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/recurring_plans/:id", "host": ["{{baseUrl}}"], "path": ["recurring_plans", ":id"], "variable": [{ "key": "id", "value": "" }] },
+            "description": "Retrieves a recurring plan by ID."
+          }
+        },
+        {
+          "name": "Update a recurring plan",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/recurring_plans/:id", "host": ["{{baseUrl}}"], "path": ["recurring_plans", ":id"], "variable": [{ "key": "id", "value": "" }] },
+            "description": "Updates a recurring plan. Only permitted within 24 hours of creation."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Supporters",
+      "item": [
+        {
+          "name": "List supporters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/supporters?limit=10", "host": ["{{baseUrl}}"], "path": ["supporters"], "query": [{ "key": "limit", "value": "10" }] },
+            "description": "Retrieves supporters (donor records) with cursor-based pagination."
+          }
+        },
+        {
+          "name": "Retrieve a supporter",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/supporters/:id", "host": ["{{baseUrl}}"], "path": ["supporters", ":id"], "variable": [{ "key": "id", "value": "" }] },
+            "description": "Retrieves a supporter by ID."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "List events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/events?limit=10", "host": ["{{baseUrl}}"], "path": ["events"], "query": [{ "key": "limit", "value": "10" }] },
+            "description": "Retrieves audit-log events across donations, recurring plans, tributes, and supporters."
+          }
+        },
+        {
+          "name": "Retrieve an event",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/events/:id", "host": ["{{baseUrl}}"], "path": ["events", ":id"], "variable": [{ "key": "id", "value": "" }] },
+            "description": "Retrieves an event by ID."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Donor Portal",
+      "item": [
+        {
+          "name": "Create a supporter access link",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/donor_portal/access_links/supporters/:id", "host": ["{{baseUrl}}"], "path": ["donor_portal", "access_links", "supporters", ":id"], "variable": [{ "key": "id", "value": "" }] },
+            "description": "Generates a secure link for a supporter to open their Donor Portal without logging in."
+          }
+        },
+        {
+          "name": "Create a recurring-plan access link",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/donor_portal/access_links/recurring_plans/:id", "host": ["{{baseUrl}}"], "path": ["donor_portal", "access_links", "recurring_plans", ":id"], "variable": [{ "key": "id", "value": "" }] },
+            "description": "Generates a secure link for a supporter to access a specific recurring plan in the Donor Portal."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+specification: API Commons Plans
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
+provider: Fundraise Up
+providerId: fundraiseup
+created: '2026-07-05'
+modified: '2026-07-05'
+reconciled: false
+tags:
+- Fundraising
+- Donations
+- Nonprofit
+- Payments
+- Plans
+description: >-
+  Fundraise Up does not sell tiered software plans or charge a separate fee for
+  the REST API. Its business model is a single transaction-based platform fee
+  taken as a percentage of each processed donation - a standard 4% on money
+  donations and 5% on cryptocurrency donations - with no setup fees, no monthly
+  platform fees, and no contracts. Payment processor fees (Stripe, PayPal, or
+  Gemini) are charged separately on top of the Fundraise Up fee. Donors can
+  optionally cover these fees at checkout, which most do, so the effective net
+  cost to the organization is often well below the headline rate. The REST API
+  is included for account holders at no extra charge; an API key is created in
+  the dashboard under Settings > API keys.
+notes: >-
+  Percentages are the publicly advertised standard rates and should be verified
+  during reconciliation on the Fundraise Up pricing page; nonprofit-discounted
+  processor rates and negotiated terms can differ.
+sources:
+- https://fundraiseup.com/pricing/
+- https://fundraiseup.com/support/pricing-faqs/
+- https://fundraiseup.com/support/tax-deductible-fees/
+- https://fundraiseup.com/docs/rest-api/
+plans:
+- id: fundraiseup-platform
+  name: Fundraise Up Platform Fee
+  type: usage
+  description: >-
+    Single pay-as-you-raise plan. A percentage platform fee is applied to each
+    processed donation, with no setup fees, monthly fees, or contracts. Includes
+    the full donation experience, recurring giving, the Donor Portal, and the
+    REST API.
+  entries:
+  - label: Standard Platform Fee
+    name: platform_fee_standard
+    type: usage
+    metric: donation_amount
+    limit: -1
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: 4% of each money donation
+    userMultiplied: false
+  - label: Cryptocurrency Platform Fee
+    name: platform_fee_crypto
+    type: usage
+    metric: donation_amount
+    limit: -1
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: 5% of each cryptocurrency donation
+    userMultiplied: false
+  - label: Payment Processor Fees
+    name: processor_fees
+    type: usage
+    metric: donation_amount
+    limit: -1
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: charged separately by Stripe, PayPal, or Gemini (nonprofit-discounted rates may apply)
+    userMultiplied: false
+  elements:
+  - name: Optimized Donation Experience
+  - name: Recurring Giving
+  - name: Donor Portal
+  - name: REST API Access
+  - name: No Setup Fee
+  - name: No Monthly Fee
+  - name: No Contract
+- id: fundraiseup-enterprise
+  name: Enterprise / Custom
+  type: enterprise
+  description: >-
+    Custom terms for large or global organizations - negotiated rates, advanced
+    security and compliance reviews, and dedicated support. Contact Fundraise Up.
+  entries:
+  - label: Custom Agreement
+    name: enterprise
+    type: flat
+    metric: contract
+    limit: -1
+    timeFrame: year
+    geo: global
+    unit: 1
+    price: contact sales
+    userMultiplied: false
+  elements:
+  - name: Negotiated Rates
+  - name: Advanced Security and Compliance
+  - name: Dedicated Support
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com
