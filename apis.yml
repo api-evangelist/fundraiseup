@@ -147,6 +147,10 @@ apis:
     in, so a nonprofit can embed self-service donor management seamlessly into its
     own platform.
 common:
+- type: DomainSecurity
+  url: security/fundraiseup-domain-security.yml
+- type: Authentication
+  url: authentication/fundraiseup-authentication.yml
 - type: LinkedIn
   url: https://www.linkedin.com/company/fundraiseup
 - type: Website
