@@ -147,6 +147,8 @@ apis:
     in, so a nonprofit can embed self-service donor management seamlessly into its
     own platform.
 common:
+- type: AgenticAccess
+  url: agentic-access/fundraiseup-agentic-access.yml
 - type: DomainSecurity
   url: security/fundraiseup-domain-security.yml
 - type: Authentication
