@@ -1,0 +1,88 @@
+openapi: 3.0.3
+info:
+  title: Fundraise Up REST Donations Donor Portal API
+  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account. It is resource-oriented, uses predictable URLs, accepts JSON-encoded request bodies with a Content-Type of application/json, and returns JSON responses. The API lets you work with Donations, Recurring Plans, Supporters (donors), and Events (an audit log), and generate Donor Portal access links. Donations and recurring plans can be created and updated, but updates are only allowed within 24 hours of creation; supporters and events are read-only. List endpoints use cursor-based pagination via the limit, starting_after, and ending_before query parameters. All requests authenticate with an API key (created in the dashboard under Settings > API keys) passed as an HTTP Bearer token. Fundraise Up does not expose a WebSocket API; event-based syncing is done by polling the Events resource. Field-level request and response schemas are intentionally left open here and should be reconciled against the hosted reference at https://api.fundraiseup.com/v1/docs/.
+  version: '1.0'
+  contact:
+    name: Fundraise Up
+    url: https://fundraiseup.com
+  license:
+    name: Proprietary
+    url: https://fundraiseup.com/terms/
+servers:
+- url: https://api.fundraiseup.com/v1
+  description: Fundraise Up REST API
+security:
+- bearerAuth: []
+tags:
+- name: Donor Portal
+  description: Secure access-link generation for the self-service Donor Portal.
+paths:
+  /donor_portal/access_links/supporters/{id}:
+    parameters:
+    - $ref: '#/components/parameters/Id'
+    post:
+      operationId: createSupporterAccessLink
+      tags:
+      - Donor Portal
+      summary: Create a supporter Donor Portal access link
+      description: Generates a secure link that lets a supporter open their Donor Portal without logging in.
+      responses:
+        '200':
+          description: The generated access link.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessLink'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /donor_portal/access_links/recurring_plans/{id}:
+    parameters:
+    - $ref: '#/components/parameters/Id'
+    post:
+      operationId: createRecurringPlanAccessLink
+      tags:
+      - Donor Portal
+      summary: Create a recurring-plan Donor Portal access link
+      description: Generates a secure link that lets a supporter access a specific recurring plan in the Donor Portal without logging in.
+      responses:
+        '200':
+          description: The generated access link.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessLink'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier of the resource.
+      schema:
+        type: string
+  responses:
+    Unauthorized:
+      description: The API key is missing or invalid.
+    NotFound:
+      description: The requested resource does not exist.
+  schemas:
+    AccessLink:
+      type: object
+      description: A secure Donor Portal access link.
+      properties:
+        url:
+          type: string
+          format: uri
+      additionalProperties: true
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key created in the dashboard under Settings > API keys, sent as a Bearer token.

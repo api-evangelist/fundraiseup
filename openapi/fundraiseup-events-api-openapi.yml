@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: Fundraise Up REST Donations Events API
+  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account. It is resource-oriented, uses predictable URLs, accepts JSON-encoded request bodies with a Content-Type of application/json, and returns JSON responses. The API lets you work with Donations, Recurring Plans, Supporters (donors), and Events (an audit log), and generate Donor Portal access links. Donations and recurring plans can be created and updated, but updates are only allowed within 24 hours of creation; supporters and events are read-only. List endpoints use cursor-based pagination via the limit, starting_after, and ending_before query parameters. All requests authenticate with an API key (created in the dashboard under Settings > API keys) passed as an HTTP Bearer token. Fundraise Up does not expose a WebSocket API; event-based syncing is done by polling the Events resource. Field-level request and response schemas are intentionally left open here and should be reconciled against the hosted reference at https://api.fundraiseup.com/v1/docs/.
+  version: '1.0'
+  contact:
+    name: Fundraise Up
+    url: https://fundraiseup.com
+  license:
+    name: Proprietary
+    url: https://fundraiseup.com/terms/
+servers:
+- url: https://api.fundraiseup.com/v1
+  description: Fundraise Up REST API
+security:
+- bearerAuth: []
+tags:
+- name: Events
+  description: Audit-log events across donations, recurring plans, tributes, and supporters.
+paths:
+  /events:
+    get:
+      operationId: listEvents
+      tags:
+      - Events
+      summary: List events
+      description: Retrieves audit-log events across donations, transaction attempts, recurring plans, tributes, and supporters, with cursor-based pagination.
+      parameters:
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/StartingAfter'
+      - $ref: '#/components/parameters/EndingBefore'
+      responses:
+        '200':
+          description: A paginated list of events.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /events/{id}:
+    parameters:
+    - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getEvent
+      tags:
+      - Events
+      summary: Retrieve an event
+      description: Retrieves the details of a specific event by ID.
+      responses:
+        '200':
+          description: The requested event.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  responses:
+    NotFound:
+      description: The requested resource does not exist.
+    Unauthorized:
+      description: The API key is missing or invalid.
+    TooManyRequests:
+      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
+  schemas:
+    EventList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Event'
+    Event:
+      type: object
+      description: An audit-log event. Field schema to be reconciled against the hosted reference.
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          example: event
+        type:
+          type: string
+          description: The event type, for example donation.success or recurring_plan.activated.
+      additionalProperties: true
+    Pagination:
+      type: object
+      properties:
+        has_more:
+          type: boolean
+          description: Whether more records are available beyond this page.
+  parameters:
+    EndingBefore:
+      name: ending_before
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records before it.
+      schema:
+        type: string
+    StartingAfter:
+      name: starting_after
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records after it.
+      schema:
+        type: string
+    Id:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier of the resource.
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Number of records to return, from 1 to 100.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key created in the dashboard under Settings > API keys, sent as a Bearer token.
