@@ -1,0 +1,11 @@
+{
+  "specVersion": "1.0",
+  "host": { "displayName": "Fundraise Up", "identifier": "did:web:fundraiseup.com" },
+  "entries": [
+    {
+      "identifier": "urn:air:fundraiseup.com:mcp:org",
+      "type": "application/mcp-server-card+json",
+      "url": "https://mcp.fundraiseup.com/org/server-card"
+    }
+  ]
+}

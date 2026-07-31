@@ -167,6 +167,8 @@ common:
   url: finops/fundraiseup-finops.yml
 - url: https://fundraiseup.com/blog/
   type: Blog
+- type: AICatalog
+  url: ai-catalog/fundraiseup-ai-catalog.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
