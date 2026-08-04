@@ -1,0 +1,22 @@
+{
+  "provider": "fundraiseup",
+  "sources": [
+    "fundraiseup-donations-api-openapi.yml",
+    "fundraiseup-donor-portal-api-openapi.yml",
+    "fundraiseup-events-api-openapi.yml",
+    "fundraiseup-recurring-plans-api-openapi.yml",
+    "fundraiseup-supporters-api-openapi.yml"
+  ],
+  "outputs": [
+    "fundraiseup-donations-api-openapi.yml",
+    "fundraiseup-donor-portal-api-openapi.yml",
+    "fundraiseup-events-api-openapi.yml",
+    "fundraiseup-recurring-plans-api-openapi.yml",
+    "fundraiseup-supporters-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}
