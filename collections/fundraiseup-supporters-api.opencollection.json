@@ -1,0 +1,74 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Fundraise Up REST Donations Supporters API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Supporters",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List supporters",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.fundraiseup.com/v1/supporters",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Number of records to return, from 1 to 100."
+              },
+              {
+                "name": "starting_after",
+                "value": "",
+                "type": "query",
+                "description": "A cursor (object ID) to fetch the page of records after it."
+              },
+              {
+                "name": "ending_before",
+                "value": "",
+                "type": "query",
+                "description": "A cursor (object ID) to fetch the page of records before it."
+              }
+            ]
+          },
+          "docs": "Retrieves supporters (donor records) with cursor-based pagination."
+        },
+        {
+          "info": {
+            "name": "Retrieve a supporter",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.fundraiseup.com/v1/supporters/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the resource."
+              }
+            ]
+          },
+          "docs": "Retrieves the details of a specific supporter by ID."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

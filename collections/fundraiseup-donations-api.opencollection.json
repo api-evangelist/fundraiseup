@@ -1,0 +1,112 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Fundraise Up REST Donations API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Donations",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List donations",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.fundraiseup.com/v1/donations",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Number of records to return, from 1 to 100."
+              },
+              {
+                "name": "starting_after",
+                "value": "",
+                "type": "query",
+                "description": "A cursor (object ID) to fetch the page of records after it."
+              },
+              {
+                "name": "ending_before",
+                "value": "",
+                "type": "query",
+                "description": "A cursor (object ID) to fetch the page of records before it."
+              }
+            ]
+          },
+          "docs": "Retrieves donations with cursor-based pagination."
+        },
+        {
+          "info": {
+            "name": "Create a donation",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/donations",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a one-time or recurring donation, including donations collected outside the website and ACH US Direct Debit donations (which require a Stripe Payment Method ID created in Stripe beforehand)."
+        },
+        {
+          "info": {
+            "name": "Retrieve a donation",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.fundraiseup.com/v1/donations/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the resource."
+              }
+            ]
+          },
+          "docs": "Retrieves the details of a specific donation by ID."
+        },
+        {
+          "info": {
+            "name": "Update a donation",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/donations/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the resource."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a donation. Updates are only permitted within 24 hours of the donation's creation."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

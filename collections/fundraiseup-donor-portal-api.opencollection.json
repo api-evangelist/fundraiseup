@@ -1,0 +1,62 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Fundraise Up REST Donations Donor Portal API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Donor Portal",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Create a supporter Donor Portal access link",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/donor_portal/access_links/supporters/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the resource."
+              }
+            ]
+          },
+          "docs": "Generates a secure link that lets a supporter open their Donor Portal without logging in."
+        },
+        {
+          "info": {
+            "name": "Create a recurring-plan Donor Portal access link",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/donor_portal/access_links/recurring_plans/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the resource."
+              }
+            ]
+          },
+          "docs": "Generates a secure link that lets a supporter access a specific recurring plan in the Donor Portal without logging in."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

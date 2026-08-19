@@ -1,0 +1,112 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Fundraise Up REST Donations Recurring Plans API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Recurring Plans",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List recurring plans",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.fundraiseup.com/v1/recurring_plans",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Number of records to return, from 1 to 100."
+              },
+              {
+                "name": "starting_after",
+                "value": "",
+                "type": "query",
+                "description": "A cursor (object ID) to fetch the page of records after it."
+              },
+              {
+                "name": "ending_before",
+                "value": "",
+                "type": "query",
+                "description": "A cursor (object ID) to fetch the page of records before it."
+              }
+            ]
+          },
+          "docs": "Retrieves recurring donation plans with cursor-based pagination."
+        },
+        {
+          "info": {
+            "name": "Create a recurring plan",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/recurring_plans",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a recurring donation plan."
+        },
+        {
+          "info": {
+            "name": "Retrieve a recurring plan",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.fundraiseup.com/v1/recurring_plans/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the resource."
+              }
+            ]
+          },
+          "docs": "Retrieves the details of a specific recurring plan by ID."
+        },
+        {
+          "info": {
+            "name": "Update a recurring plan",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fundraiseup.com/v1/recurring_plans/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the resource."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a recurring plan. Updates are only permitted within 24 hours of the plan's creation."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
