@@ -28,6 +28,13 @@ image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/fundraiseu
 tags:
 - Fundraising
 - Donations
+- Non-Profit
+- Payments
+- Recurring Giving
+- Donor Management
+tags_raw:
+- Fundraising
+- Donations
 - Nonprofit
 - Payments
 - Recurring Giving
@@ -86,6 +93,8 @@ apis:
   humanURL: https://api.fundraiseup.com/v1/docs/
   baseURL: https://api.fundraiseup.com/v1
   tags:
+  - Event
+  tags_raw:
   - Events
   properties:
   - type: OpenAPI
