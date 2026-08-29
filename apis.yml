@@ -11,6 +11,18 @@ description: Fundraise Up is an online donation and fundraising platform for
   CRMs, BI tools, and data warehouses. The API is resource-oriented, uses
   JSON-encoded request bodies, and authenticates with an API key over HTTP Bearer.
   Base URL is https://api.fundraiseup.com/v1.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: paid
   onboarding: self-serve
