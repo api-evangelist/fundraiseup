@@ -1,6 +1,9 @@
 {
   "specVersion": "1.0",
-  "host": { "displayName": "Fundraise Up", "identifier": "did:web:fundraiseup.com" },
+  "host": {
+    "displayName": "Fundraise Up",
+    "identifier": "did:web:fundraiseup.com"
+  },
   "entries": [
     {
       "identifier": "urn:air:fundraiseup.com:mcp:org",
