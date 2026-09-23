@@ -1,7 +1,7 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: Fundraise Up REST Donations Events API
-  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account. It is resource-oriented, uses predictable URLs, accepts JSON-encoded request bodies with a Content-Type of application/json, and returns JSON responses. The API lets you work with Donations, Recurring Plans, Supporters (donors), and Events (an audit log), and generate Donor Portal access links. Donations and recurring plans can be created and updated, but updates are only allowed within 24 hours of creation; supporters and events are read-only. List endpoints use cursor-based pagination via the limit, starting_after, and ending_before query parameters. All requests authenticate with an API key (created in the dashboard under Settings > API keys) passed as an HTTP Bearer token. Fundraise Up does not expose a WebSocket API; event-based syncing is done by polling the Events resource. Field-level request and response schemas are intentionally left open here and should be reconciled against the hosted reference at https://api.fundraiseup.com/v1/docs/.
+  title: Fundraise Up REST Events API
+  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account.
   version: '1.0'
   contact:
     name: Fundraise Up
@@ -61,14 +61,52 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier of the resource.
+      schema:
+        type: string
+    StartingAfter:
+      name: starting_after
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records after it.
+      schema:
+        type: string
+    EndingBefore:
+      name: ending_before
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records before it.
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Number of records to return, from 1 to 100.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
   responses:
-    NotFound:
-      description: The requested resource does not exist.
     Unauthorized:
       description: The API key is missing or invalid.
     TooManyRequests:
       description: Rate limit exceeded (8 requests/second or 128 requests/minute).
+    NotFound:
+      description: The requested resource does not exist.
   schemas:
+    Pagination:
+      type: object
+      properties:
+        has_more:
+          type: boolean
+          description: Whether more records are available beyond this page.
     EventList:
       allOf:
       - $ref: '#/components/schemas/Pagination'
@@ -91,44 +129,6 @@ components:
           type: string
           description: The event type, for example donation.success or recurring_plan.activated.
       additionalProperties: true
-    Pagination:
-      type: object
-      properties:
-        has_more:
-          type: boolean
-          description: Whether more records are available beyond this page.
-  parameters:
-    EndingBefore:
-      name: ending_before
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records before it.
-      schema:
-        type: string
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
-      schema:
-        type: string
-    Id:
-      name: id
-      in: path
-      required: true
-      description: The unique identifier of the resource.
-      schema:
-        type: string
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: Number of records to return, from 1 to 100.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
   securitySchemes:
     bearerAuth:
       type: http

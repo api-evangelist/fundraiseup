@@ -1,7 +1,7 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: Fundraise Up REST Donations Recurring Plans API
-  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account. It is resource-oriented, uses predictable URLs, accepts JSON-encoded request bodies with a Content-Type of application/json, and returns JSON responses. The API lets you work with Donations, Recurring Plans, Supporters (donors), and Events (an audit log), and generate Donor Portal access links. Donations and recurring plans can be created and updated, but updates are only allowed within 24 hours of creation; supporters and events are read-only. List endpoints use cursor-based pagination via the limit, starting_after, and ending_before query parameters. All requests authenticate with an API key (created in the dashboard under Settings > API keys) passed as an HTTP Bearer token. Fundraise Up does not expose a WebSocket API; event-based syncing is done by polling the Events resource. Field-level request and response schemas are intentionally left open here and should be reconciled against the hosted reference at https://api.fundraiseup.com/v1/docs/.
+  title: Fundraise Up REST Recurring Plans API
+  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account.
   version: '1.0'
   contact:
     name: Fundraise Up
@@ -107,39 +107,6 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  responses:
-    NotFound:
-      description: The requested resource does not exist.
-    Unauthorized:
-      description: The API key is missing or invalid.
-    TooManyRequests:
-      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
-  schemas:
-    RecurringPlanList:
-      allOf:
-      - $ref: '#/components/schemas/Pagination'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/RecurringPlan'
-    Pagination:
-      type: object
-      properties:
-        has_more:
-          type: boolean
-          description: Whether more records are available beyond this page.
-    RecurringPlan:
-      type: object
-      description: A recurring donation plan. Field schema to be reconciled against the hosted reference.
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          example: recurring_plan
-      additionalProperties: true
   parameters:
     Id:
       name: id
@@ -172,6 +139,39 @@ components:
         minimum: 1
         maximum: 100
         default: 10
+  schemas:
+    RecurringPlan:
+      type: object
+      description: A recurring donation plan. Field schema to be reconciled against the hosted reference.
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          example: recurring_plan
+      additionalProperties: true
+    Pagination:
+      type: object
+      properties:
+        has_more:
+          type: boolean
+          description: Whether more records are available beyond this page.
+    RecurringPlanList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/RecurringPlan'
+  responses:
+    Unauthorized:
+      description: The API key is missing or invalid.
+    TooManyRequests:
+      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
+    NotFound:
+      description: The requested resource does not exist.
   securitySchemes:
     bearerAuth:
       type: http
