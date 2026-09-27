@@ -115,18 +115,18 @@ components:
       description: The unique identifier of the resource.
       schema:
         type: string
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
-      schema:
-        type: string
     EndingBefore:
       name: ending_before
       in: query
       required: false
       description: A cursor (object ID) to fetch the page of records before it.
+      schema:
+        type: string
+    StartingAfter:
+      name: starting_after
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records after it.
       schema:
         type: string
     Limit:
@@ -140,13 +140,23 @@ components:
         maximum: 100
         default: 10
   responses:
-    Unauthorized:
-      description: The API key is missing or invalid.
     TooManyRequests:
       description: Rate limit exceeded (8 requests/second or 128 requests/minute).
+    Unauthorized:
+      description: The API key is missing or invalid.
     NotFound:
       description: The requested resource does not exist.
   schemas:
+    Donation:
+      type: object
+      description: A one-time or recurring donation. Field schema to be reconciled against the hosted reference.
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          example: donation
+      additionalProperties: true
     Pagination:
       type: object
       properties:
@@ -162,16 +172,6 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Donation'
-    Donation:
-      type: object
-      description: A one-time or recurring donation. Field schema to be reconciled against the hosted reference.
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          example: donation
-      additionalProperties: true
   securitySchemes:
     bearerAuth:
       type: http

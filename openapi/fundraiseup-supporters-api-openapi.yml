@@ -69,18 +69,18 @@ components:
       description: The unique identifier of the resource.
       schema:
         type: string
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
-      schema:
-        type: string
     EndingBefore:
       name: ending_before
       in: query
       required: false
       description: A cursor (object ID) to fetch the page of records before it.
+      schema:
+        type: string
+    StartingAfter:
+      name: starting_after
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records after it.
       schema:
         type: string
     Limit:
@@ -93,6 +93,13 @@ components:
         minimum: 1
         maximum: 100
         default: 10
+  responses:
+    TooManyRequests:
+      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
+    Unauthorized:
+      description: The API key is missing or invalid.
+    NotFound:
+      description: The requested resource does not exist.
   schemas:
     SupporterList:
       allOf:
@@ -103,12 +110,6 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Supporter'
-    Pagination:
-      type: object
-      properties:
-        has_more:
-          type: boolean
-          description: Whether more records are available beyond this page.
     Supporter:
       type: object
       description: A supporter (donor) record. Field schema to be reconciled against the hosted reference.
@@ -119,13 +120,12 @@ components:
           type: string
           example: supporter
       additionalProperties: true
-  responses:
-    Unauthorized:
-      description: The API key is missing or invalid.
-    TooManyRequests:
-      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
-    NotFound:
-      description: The requested resource does not exist.
+    Pagination:
+      type: object
+      properties:
+        has_more:
+          type: boolean
+          description: Whether more records are available beyond this page.
   securitySchemes:
     bearerAuth:
       type: http

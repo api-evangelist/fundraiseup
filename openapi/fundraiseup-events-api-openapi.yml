@@ -69,18 +69,18 @@ components:
       description: The unique identifier of the resource.
       schema:
         type: string
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
-      schema:
-        type: string
     EndingBefore:
       name: ending_before
       in: query
       required: false
       description: A cursor (object ID) to fetch the page of records before it.
+      schema:
+        type: string
+    StartingAfter:
+      name: starting_after
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records after it.
       schema:
         type: string
     Limit:
@@ -94,28 +94,13 @@ components:
         maximum: 100
         default: 10
   responses:
-    Unauthorized:
-      description: The API key is missing or invalid.
     TooManyRequests:
       description: Rate limit exceeded (8 requests/second or 128 requests/minute).
+    Unauthorized:
+      description: The API key is missing or invalid.
     NotFound:
       description: The requested resource does not exist.
   schemas:
-    Pagination:
-      type: object
-      properties:
-        has_more:
-          type: boolean
-          description: Whether more records are available beyond this page.
-    EventList:
-      allOf:
-      - $ref: '#/components/schemas/Pagination'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Event'
     Event:
       type: object
       description: An audit-log event. Field schema to be reconciled against the hosted reference.
@@ -129,6 +114,21 @@ components:
           type: string
           description: The event type, for example donation.success or recurring_plan.activated.
       additionalProperties: true
+    EventList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Event'
+    Pagination:
+      type: object
+      properties:
+        has_more:
+          type: boolean
+          description: Whether more records are available beyond this page.
   securitySchemes:
     bearerAuth:
       type: http
