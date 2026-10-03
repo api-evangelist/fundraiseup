@@ -61,45 +61,6 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  parameters:
-    Id:
-      name: id
-      in: path
-      required: true
-      description: The unique identifier of the resource.
-      schema:
-        type: string
-    EndingBefore:
-      name: ending_before
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records before it.
-      schema:
-        type: string
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
-      schema:
-        type: string
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: Number of records to return, from 1 to 100.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-  responses:
-    TooManyRequests:
-      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
-    Unauthorized:
-      description: The API key is missing or invalid.
-    NotFound:
-      description: The requested resource does not exist.
   schemas:
     Event:
       type: object
@@ -129,6 +90,45 @@ components:
         has_more:
           type: boolean
           description: Whether more records are available beyond this page.
+  parameters:
+    StartingAfter:
+      name: starting_after
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records after it.
+      schema:
+        type: string
+    Id:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier of the resource.
+      schema:
+        type: string
+    EndingBefore:
+      name: ending_before
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records before it.
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Number of records to return, from 1 to 100.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+  responses:
+    Unauthorized:
+      description: The API key is missing or invalid.
+    NotFound:
+      description: The requested resource does not exist.
+    TooManyRequests:
+      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
   securitySchemes:
     bearerAuth:
       type: http

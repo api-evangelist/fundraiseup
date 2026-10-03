@@ -59,11 +59,6 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  responses:
-    Unauthorized:
-      description: The API key is missing or invalid.
-    NotFound:
-      description: The requested resource does not exist.
   parameters:
     Id:
       name: id
@@ -81,6 +76,11 @@ components:
           type: string
           format: uri
       additionalProperties: true
+  responses:
+    NotFound:
+      description: The requested resource does not exist.
+    Unauthorized:
+      description: The API key is missing or invalid.
   securitySchemes:
     bearerAuth:
       type: http

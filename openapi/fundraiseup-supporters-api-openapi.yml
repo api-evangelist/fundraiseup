@@ -62,6 +62,13 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   parameters:
+    StartingAfter:
+      name: starting_after
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records after it.
+      schema:
+        type: string
     Id:
       name: id
       in: path
@@ -74,13 +81,6 @@ components:
       in: query
       required: false
       description: A cursor (object ID) to fetch the page of records before it.
-      schema:
-        type: string
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
       schema:
         type: string
     Limit:
@@ -101,15 +101,6 @@ components:
     NotFound:
       description: The requested resource does not exist.
   schemas:
-    SupporterList:
-      allOf:
-      - $ref: '#/components/schemas/Pagination'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Supporter'
     Supporter:
       type: object
       description: A supporter (donor) record. Field schema to be reconciled against the hosted reference.
@@ -126,6 +117,15 @@ components:
         has_more:
           type: boolean
           description: Whether more records are available beyond this page.
+    SupporterList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Supporter'
   securitySchemes:
     bearerAuth:
       type: http
