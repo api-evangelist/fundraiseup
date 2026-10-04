@@ -169,6 +169,9 @@ apis:
   - type: Documentation
     url: https://fundraiseup.com/docs/seamless-donor-portal/
 common:
+- type: CapabilityMap
+  url: capabilities/fundraiseup-capability-edges.yml
+  name: Fundraise Up Business Capability Map
 - type: AgenticAccess
   url: agentic-access/fundraiseup-agentic-access.yml
 - type: DomainSecurity
