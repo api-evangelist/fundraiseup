@@ -107,48 +107,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  parameters:
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
-      schema:
-        type: string
-    Id:
-      name: id
-      in: path
-      required: true
-      description: The unique identifier of the resource.
-      schema:
-        type: string
-    EndingBefore:
-      name: ending_before
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records before it.
-      schema:
-        type: string
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: Number of records to return, from 1 to 100.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
   schemas:
-    DonationList:
-      allOf:
-      - $ref: '#/components/schemas/Pagination'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Donation'
     Pagination:
       type: object
       properties:
@@ -165,13 +124,54 @@ components:
           type: string
           example: donation
       additionalProperties: true
+    DonationList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Donation'
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Number of records to return, from 1 to 100.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    Id:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier of the resource.
+      schema:
+        type: string
+    StartingAfter:
+      name: starting_after
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records after it.
+      schema:
+        type: string
+    EndingBefore:
+      name: ending_before
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records before it.
+      schema:
+        type: string
   responses:
-    Unauthorized:
-      description: The API key is missing or invalid.
-    NotFound:
-      description: The requested resource does not exist.
     TooManyRequests:
       description: Rate limit exceeded (8 requests/second or 128 requests/minute).
+    NotFound:
+      description: The requested resource does not exist.
+    Unauthorized:
+      description: The API key is missing or invalid.
   securitySchemes:
     bearerAuth:
       type: http

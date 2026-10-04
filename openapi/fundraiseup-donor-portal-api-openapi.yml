@@ -59,14 +59,6 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  parameters:
-    Id:
-      name: id
-      in: path
-      required: true
-      description: The unique identifier of the resource.
-      schema:
-        type: string
   schemas:
     AccessLink:
       type: object
@@ -77,10 +69,18 @@ components:
           format: uri
       additionalProperties: true
   responses:
-    NotFound:
-      description: The requested resource does not exist.
     Unauthorized:
       description: The API key is missing or invalid.
+    NotFound:
+      description: The requested resource does not exist.
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier of the resource.
+      schema:
+        type: string
   securitySchemes:
     bearerAuth:
       type: http

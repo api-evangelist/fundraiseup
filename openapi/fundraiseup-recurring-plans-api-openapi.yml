@@ -107,46 +107,13 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  parameters:
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
-      schema:
-        type: string
-    Id:
-      name: id
-      in: path
-      required: true
-      description: The unique identifier of the resource.
-      schema:
-        type: string
-    EndingBefore:
-      name: ending_before
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records before it.
-      schema:
-        type: string
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: Number of records to return, from 1 to 100.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-  responses:
-    Unauthorized:
-      description: The API key is missing or invalid.
-    NotFound:
-      description: The requested resource does not exist.
-    TooManyRequests:
-      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
   schemas:
+    Pagination:
+      type: object
+      properties:
+        has_more:
+          type: boolean
+          description: Whether more records are available beyond this page.
     RecurringPlan:
       type: object
       description: A recurring donation plan. Field schema to be reconciled against the hosted reference.
@@ -157,12 +124,6 @@ components:
           type: string
           example: recurring_plan
       additionalProperties: true
-    Pagination:
-      type: object
-      properties:
-        has_more:
-          type: boolean
-          description: Whether more records are available beyond this page.
     RecurringPlanList:
       allOf:
       - $ref: '#/components/schemas/Pagination'
@@ -172,6 +133,45 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/RecurringPlan'
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Number of records to return, from 1 to 100.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    Id:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier of the resource.
+      schema:
+        type: string
+    StartingAfter:
+      name: starting_after
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records after it.
+      schema:
+        type: string
+    EndingBefore:
+      name: ending_before
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records before it.
+      schema:
+        type: string
+  responses:
+    NotFound:
+      description: The requested resource does not exist.
+    TooManyRequests:
+      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
+    Unauthorized:
+      description: The API key is missing or invalid.
   securitySchemes:
     bearerAuth:
       type: http
