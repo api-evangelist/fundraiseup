@@ -1,0 +1,534 @@
+openapi: 3.2.0
+info:
+  title: Fundraise Up Designation groups API
+  description: '1. Overview
+
+    2. Limitations
+
+    3. Key features
+
+    4. Use cases
+
+    5. How to get API key
+
+    6. Managing API keys
+
+    7. Authentication
+
+    8. Parent accounts and subaccounts
+
+    9. Rate limits
+
+    10. Errors
+
+    11. Pagination
+
+    12. Request IDs
+
+    13. Changes in API
+
+
+    ## Overview
+
+
+    The Fundraise Up API gives you more control over your fundraising data. Use it to process offline donations through your Fundraise Up account and keep your CRM or other systems up to date with your fundraising activity. With the API, you can interact with these resources:
+
+
+    - Donations — Create and update donations and their associated recurring plans (within 24 hours of creation, API-created only). - Recurring plans — Read recurring donation schedules. - Supporters — Access supporter details. - Events — Retrieve events from your Audit Log. - Donor Portal access links — Authenticate supporters in the Donor Portal. - Donor Portal recurring plan access links — Provide direct access to recurring plan settings. - Campaigns — List and retrieve campaign details, assign and unassign designations. - Designations — Create, update, delete, and list designations, including batch operations. - Designation groups — List and retrieve designation groups, assign and unassign designations. - Designation configurations — Access relationships between designations and campaigns. - Upgrade links — Generate upgrade links for one-time donations to convert them into recurring plans. ## Limitations
+
+
+    - Most endpoints operate on a single object per request. Designation endpoints support batch operations for up to 100 items. - Updates to Donations and Recurring plans are restricted to the first 24 hours and apply only to API-created donations. - You can retrieve and export data only for Donations, Recurring plans, Supporters, Events, Campaigns, Designations, Designation groups, and Designation configurations. - The API supports the following payment methods: credit cards, debit cards, Apple Pay, Google Pay, ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit). - For ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) donations, Fundraise Up sends the mandate confirmation email to the supporter only when `supporter.email` is provided. Without an email, notifying the supporter about the direct debit mandate is the organization''s responsibility. ## Key features
+
+
+    - Architecture — Built on REST principles. - URLs — Provides predictable, resource-oriented URLs. - Requests — Accepts JSON-encoded request bodies with `Content-Type: application/json` header. - Responses — Returns JSON-encoded responses. - Standards — Uses standard HTTP response codes, authentication, and verbs. ## Use cases
+
+
+    There are a variety of use cases where you can integrate our API into your fundraising flow. In particular, you can use our API for:
+
+
+    - Ticketing and events. - Face-to-face fundraising. - Direct mail campaigns. - Telefundraising. - Fundraising galas and dinners. - Analytics integrations. The API is not intended for migrating subscriptions from legacy systems. For migration purposes, please refer to our Migration service. ## How to get API key
+
+
+    To use the Fundraise Up API, you first need to generate an API key. Only users with the Organization Administrator role can create and manage API keys. Follow these steps to create your API key:
+
+
+    1. Go to **Dashboard** > **Settings** > **API keys**. 2. Click **Create API key**. 3. Enter a descriptive name for your API key. This name helps you identify different keys when you have multiple integrations. 4. Set permissions for your key.'
+  version: 1.0.0
+  contact: {}
+servers: []
+tags:
+- name: Designation groups
+  description: The Designation group object represents a container for related designations and other designation groups in your Fundraise Up account.
+paths:
+  /v1/designation_groups:
+    get:
+      description: Use this request to retrieve a paginated list of designation groups from your Fundraise Up account. A designation group is a container for related designations and other designation groups.
+      operationId: GetDesignationGroups
+      parameters:
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designation groups only exist in live mode — set this to `true`.
+        schema:
+          example: true
+          type: boolean
+      - name: starting_after
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records older than the specified object ID.
+        schema:
+          type: string
+      - name: ending_before
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records newer than the specified object ID.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: This parameter specifies the number of records to display per page, ranging from 1 to 100
+        schema:
+          minimum: 1
+          maximum: 100
+          default: 10
+          type: integer
+      - name: created
+        required: false
+        in: query
+        description: Filters results by the record creation date. Accepts a single date or a date range in RFC 3339 format.
+        schema:
+          $ref: '#/components/schemas/CreatedQuery'
+      - name: designation
+        required: false
+        in: query
+        description: The ID of the designation to filter by. Returns groups containing the specified designation.
+        schema:
+          example: EXXXXXXX
+          type: string
+      responses:
+        '200':
+          description: On success, the API returns a list of designation groups. The response includes an array of designation group objects and a boolean indicating whether more records are available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesignationGroupsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access designation groups.
+      security:
+      - bearer: []
+      summary: Get designation groups
+      tags:
+      - Designation groups
+  /v1/designation_groups/{id}:
+    get:
+      description: This request lets you retrieve a single designation group from your Fundraise Up account. A designation group is a container for related designations and other designation groups.
+      operationId: GetDesignationGroup
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the designation group, formatted as L[A-Z\d]{7}.
+        schema:
+          example: LXXXXXXX
+          type: string
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designation groups only exist in live mode — set this to `true`.
+        schema:
+          example: true
+          type: boolean
+      responses:
+        '200':
+          description: On success, the API returns the designation group object. If the provided identifier is invalid or no matching group exists for the current account, the request returns an error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesignationGroupResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access designation groups.
+        '404':
+          description: Resource not found.
+      security:
+      - bearer: []
+      summary: Get a designation group
+      tags:
+      - Designation groups
+  /v1/designation_groups/{id}/designations/assign:
+    post:
+      description: Use this request to attach one or more designations to a designation group. Each item is processed independently; the response reports the per-item outcome.
+      operationId: AssignDesignationsToGroup
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the designation group, formatted as L[A-Z\d]{7}.
+        schema:
+          example: LXXXXXXX
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchAssignDesignationsRequest'
+      responses:
+        '200':
+          description: On success, the API returns the overall status and a per-item result array describing which designations were attached.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchAssignDesignationsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to manage designation groups.
+        '404':
+          description: Resource not found.
+        '422':
+          description: The request contains duplicated ids.
+      security:
+      - bearer: []
+      summary: Assign designations to a designation group
+      tags:
+      - Designation groups
+  /v1/designation_groups/{id}/designations/unassign:
+    post:
+      description: Use this request to detach one or more designations from a designation group. Each item is processed independently; the response reports the per-item outcome.
+      operationId: UnassignDesignationsFromGroup
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the designation group, formatted as L[A-Z\d]{7}.
+        schema:
+          example: LXXXXXXX
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchUnassignDesignationsRequest'
+      responses:
+        '200':
+          description: On success, the API returns the overall status and a per-item result array describing which designations were detached.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchUnassignDesignationsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to manage designation groups.
+        '404':
+          description: Resource not found.
+        '422':
+          description: The request contains duplicated ids.
+      security:
+      - bearer: []
+      summary: Unassign designations from a designation group
+      tags:
+      - Designation groups
+components:
+  schemas:
+    DesignationGroupResponse:
+      type: object
+      properties:
+        children:
+          type: array
+          description: Designations or nested designation groups.
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/ChildDesignation'
+            - $ref: '#/components/schemas/ChildGroup'
+            discriminator:
+              propertyName: type
+              mapping:
+                designation: '#/components/schemas/ChildDesignation'
+                designation_group: '#/components/schemas/ChildGroup'
+        id:
+          type: string
+          description: Unique identifier of the designation group.
+          example: LXXXXXXX
+        name:
+          type: string
+          description: Designation group name.
+          example: Education Programs
+      description: Contains designation group record with full details.
+      required:
+      - id
+      - name
+      - children
+    BatchAssignDesignationsRequest:
+      type: object
+      properties:
+        items:
+          minItems: 1
+          maxItems: 100
+          description: An array of designations to assign to the designation group.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchAssignDesignationItem'
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designation groups only exist in live mode — set this to `true`.
+          example: true
+      description: Contains the designations to attach to a designation group.
+      required:
+      - items
+    DesignationGroupBatchItemError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+          - designation_not_found
+          - designation_not_attached
+          description: Error code.
+          example: designation_not_attached
+        message:
+          type: string
+          description: Error message.
+          example: Designation is not attached to this group.
+      description: Error describing why a single batch item could not be processed.
+      required:
+      - code
+      - message
+    BatchAssignDesignationItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+      description: A single designation to attach to the designation group.
+      required:
+      - id
+    BatchUnassignDesignationsRequest:
+      type: object
+      properties:
+        items:
+          minItems: 1
+          maxItems: 100
+          description: An array of designations to unassign from the designation group.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchUnassignDesignationItem'
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designation groups only exist in live mode — set this to `true`.
+          example: true
+      description: Contains the designations to detach from a designation group.
+      required:
+      - items
+    ChildGroup:
+      type: object
+      properties:
+        children:
+          type: array
+          description: 'Child items: designations or nested designation groups (up to 3 levels deep).'
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/ChildDesignation'
+            - $ref: '#/components/schemas/ChildGroup'
+            discriminator:
+              propertyName: type
+              mapping:
+                designation: '#/components/schemas/ChildDesignation'
+                designation_group: '#/components/schemas/ChildGroup'
+        id:
+          type: string
+          description: Unique designation group identifier.
+          example: LXXXXXXX
+        name:
+          type: string
+          description: Designation group name.
+          example: Regional Programs
+        type:
+          type: string
+          enum:
+          - designation_group
+          description: Item type discriminator. Always `designation_group`.
+          example: designation_group
+      description: A designation group nested inside another designation group.
+      required:
+      - type
+      - id
+      - name
+      - children
+    DesignationGroupAssignDesignationError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+          - designation_not_found
+          - designation_already_attached
+          description: Error code.
+          example: designation_not_found
+        message:
+          type: string
+          description: Error message.
+          example: Designation not found.
+      description: Error describing why a single batch item could not be processed.
+      required:
+      - code
+      - message
+    DesignationGroupsResponse:
+      type: object
+      properties:
+        data:
+          description: An array containing the designation group records, paginated by any request parameters.
+          type: array
+          items:
+            $ref: '#/components/schemas/DesignationGroupResponse'
+        has_more:
+          type: boolean
+          description: Indicates whether there are more records available. For `starting_after`, it shows that there is a page with older records. For `ending_before`, it indicates that there is a page with newer records.
+          example: true
+      description: Provides a paginated response for designation groups.
+      required:
+      - data
+      - has_more
+    CreatedQuery:
+      type: object
+      properties:
+        created[gt]:
+          type: string
+          format: date-time
+          description: Minimum creation date (exclusive). Returns records after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[gte]:
+          type: string
+          format: date-time
+          description: Minimum creation date (inclusive). Returns records from and after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lt]:
+          type: string
+          format: date-time
+          description: Maximum creation date (exclusive). Returns records before this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lte]:
+          type: string
+          format: date-time
+          description: Maximum creation date (inclusive). Returns records up to and including this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+      description: Filters results by the record creation date. Accepts a single date or a date range in RFC 3339 format.
+    BatchUnassignResultItem:
+      type: object
+      properties:
+        error:
+          description: Error object. `null` on success.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/DesignationGroupBatchItemError'
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+      description: Result of detaching a single designation from the designation group.
+      required:
+      - id
+      - error
+    BatchAssignDesignationsResponse:
+      type: object
+      properties:
+        results:
+          description: An array containing the result for each item in the request, in the same order.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchAssignResultItem'
+        status:
+          type: string
+          enum:
+          - complete
+          - partial
+          - failed
+          description: Status of the bulk operation.
+          example: partial
+      description: Per-item result of attaching designations to a designation group.
+      required:
+      - status
+      - results
+    BatchUnassignDesignationsResponse:
+      type: object
+      properties:
+        results:
+          description: An array containing the result for each item in the request, in the same order.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchUnassignResultItem'
+        status:
+          type: string
+          enum:
+          - complete
+          - partial
+          - failed
+          description: Status of the bulk operation.
+          example: partial
+      description: Per-item result of detaching designations from a designation group.
+      required:
+      - status
+      - results
+    BatchAssignResultItem:
+      type: object
+      properties:
+        error:
+          description: Error object. `null` on success.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/DesignationGroupAssignDesignationError'
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+      description: Result of attaching a single designation to the designation group.
+      required:
+      - id
+      - error
+    BatchUnassignDesignationItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+      description: A single designation to detach from the designation group.
+      required:
+      - id
+    ChildDesignation:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Designation code.
+          example: SCH-01
+        id:
+          type: string
+          description: Unique designation identifier.
+          example: EXXXXXXX
+        name:
+          type: string
+          description: Designation name.
+          example: Scholarship Fund
+        type:
+          type: string
+          enum:
+          - designation
+          description: Item type discriminator. Always `designation`.
+          example: designation
+      description: A designation that belongs to a designation group.
+      required:
+      - type
+      - id
+      - name
+      - code
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: API key
+      type: http

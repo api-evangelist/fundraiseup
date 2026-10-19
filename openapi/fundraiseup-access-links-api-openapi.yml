@@ -1,0 +1,173 @@
+openapi: 3.2.0
+info:
+  title: Fundraise Up Access links API
+  description: '1. Overview
+
+    2. Limitations
+
+    3. Key features
+
+    4. Use cases
+
+    5. How to get API key
+
+    6. Managing API keys
+
+    7. Authentication
+
+    8. Parent accounts and subaccounts
+
+    9. Rate limits
+
+    10. Errors
+
+    11. Pagination
+
+    12. Request IDs
+
+    13. Changes in API
+
+
+    ## Overview
+
+
+    The Fundraise Up API gives you more control over your fundraising data. Use it to process offline donations through your Fundraise Up account and keep your CRM or other systems up to date with your fundraising activity. With the API, you can interact with these resources:
+
+
+    - Donations — Create and update donations and their associated recurring plans (within 24 hours of creation, API-created only). - Recurring plans — Read recurring donation schedules. - Supporters — Access supporter details. - Events — Retrieve events from your Audit Log. - Donor Portal access links — Authenticate supporters in the Donor Portal. - Donor Portal recurring plan access links — Provide direct access to recurring plan settings. - Campaigns — List and retrieve campaign details, assign and unassign designations. - Designations — Create, update, delete, and list designations, including batch operations. - Designation groups — List and retrieve designation groups, assign and unassign designations. - Designation configurations — Access relationships between designations and campaigns. - Upgrade links — Generate upgrade links for one-time donations to convert them into recurring plans. ## Limitations
+
+
+    - Most endpoints operate on a single object per request. Designation endpoints support batch operations for up to 100 items. - Updates to Donations and Recurring plans are restricted to the first 24 hours and apply only to API-created donations. - You can retrieve and export data only for Donations, Recurring plans, Supporters, Events, Campaigns, Designations, Designation groups, and Designation configurations. - The API supports the following payment methods: credit cards, debit cards, Apple Pay, Google Pay, ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit). - For ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) donations, Fundraise Up sends the mandate confirmation email to the supporter only when `supporter.email` is provided. Without an email, notifying the supporter about the direct debit mandate is the organization''s responsibility. ## Key features
+
+
+    - Architecture — Built on REST principles. - URLs — Provides predictable, resource-oriented URLs. - Requests — Accepts JSON-encoded request bodies with `Content-Type: application/json` header. - Responses — Returns JSON-encoded responses. - Standards — Uses standard HTTP response codes, authentication, and verbs. ## Use cases
+
+
+    There are a variety of use cases where you can integrate our API into your fundraising flow. In particular, you can use our API for:
+
+
+    - Ticketing and events. - Face-to-face fundraising. - Direct mail campaigns. - Telefundraising. - Fundraising galas and dinners. - Analytics integrations. The API is not intended for migrating subscriptions from legacy systems. For migration purposes, please refer to our Migration service. ## How to get API key
+
+
+    To use the Fundraise Up API, you first need to generate an API key. Only users with the Organization Administrator role can create and manage API keys. Follow these steps to create your API key:
+
+
+    1. Go to **Dashboard** > **Settings** > **API keys**. 2. Click **Create API key**. 3. Enter a descriptive name for your API key. This name helps you identify different keys when you have multiple integrations. 4. Set permissions for your key.'
+  version: 1.0.0
+  contact: {}
+servers: []
+tags:
+- name: Access links
+  description: The Access link object represents link that grant supporter access to their Donor Portal.
+paths:
+  /v1/donor_portal/access_links/supporters/{id}:
+    post:
+      description: This request generates a link that allows a specific supporter to access their Fundraise Up Donor Portal page without logging in. Read more about integrating Fundraise Up Donor Portal with your platform.
+      operationId: CreateDonorAuthLinkBySupporterId
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the supporter, formatted as S[A-Z]{7}.
+        schema:
+          example: SXXXXXXX
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetDonorAuthLinkByCustomerKeyBody'
+      responses:
+        '200':
+          description: Donor Portal authentication link retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonorAuthLinkResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to perform this operation.
+      security:
+      - bearer: []
+      summary: Create a Donor Portal access link for a supporter
+      tags:
+      - Access links
+  /v1/donor_portal/access_links/recurring_plans/{id}:
+    post:
+      description: 'This request generates a link that allows a supporter to view and edit a specific recurring plan. Access to other sections of the Fundraise Up Donor Portal is restricted.
+
+
+        Parent accounts cannot use their API keys to create Donor Portal access links for subaccounts. To create access links for a subaccount, generate an API key within that specific subaccount and use it.
+
+
+        Read more about integrating Fundraise Up Donor Portal with your platform.'
+      operationId: CreateDonorAuthLinkBySubscriptionId
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the recurring plan in the format R[A-Z]{7}.
+        schema:
+          example: RXXXXXXX
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetDonorAuthLinkBySubscriptionKeyBody'
+      responses:
+        '200':
+          description: Successful response containing the generated donor portal access link.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonorAuthLinkResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to perform this operation.
+      security:
+      - bearer: []
+      summary: Create a Donor Portal access link for a recurring plan
+      tags:
+      - Access links
+components:
+  schemas:
+    GetDonorAuthLinkBySubscriptionKeyBody:
+      type: object
+      properties:
+        back_url:
+          type: string
+          description: Back URL
+          example: https://example.com
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+          example: true
+    DonorAuthLinkResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          description: 'Authentication link for the Donor Portal. Must be a valid URL starting with `http://` or `https://`. If invalid, a `400 Bad Request error` will occur.
+
+
+            This URL appears as the "← Back to home" link in the Donor Portal. The supporter can click this link or the portal logo to return to your organization''s portal.
+
+
+            If not provided, the "← Back to home" button will not appear and the portal logo will not be clickable.'
+          example: https://example.demo-donorsupport.com/-/XXXXXXXX?member=YYYYYYYY
+      description: Contains the response for a generated Donor Portal authentication link.
+      required:
+      - url
+    GetDonorAuthLinkByCustomerKeyBody:
+      type: object
+      properties:
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+          example: true
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: API key
+      type: http

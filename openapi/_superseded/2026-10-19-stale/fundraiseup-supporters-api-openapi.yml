@@ -1,0 +1,133 @@
+openapi: 3.2.0
+info:
+  title: Fundraise Up REST Supporters API
+  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account.
+  version: '1.0'
+  contact:
+    name: Fundraise Up
+    url: https://fundraiseup.com
+  license:
+    name: Proprietary
+    url: https://fundraiseup.com/terms/
+servers:
+- url: https://api.fundraiseup.com/v1
+  description: Fundraise Up REST API
+security:
+- bearerAuth: []
+tags:
+- name: Supporters
+  description: Donor records (Fundraise Up calls donors "supporters").
+paths:
+  /supporters:
+    get:
+      operationId: listSupporters
+      tags:
+      - Supporters
+      summary: List supporters
+      description: Retrieves supporters (donor records) with cursor-based pagination.
+      parameters:
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/StartingAfter'
+      - $ref: '#/components/parameters/EndingBefore'
+      responses:
+        '200':
+          description: A paginated list of supporters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupporterList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /supporters/{id}:
+    parameters:
+    - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getSupporter
+      tags:
+      - Supporters
+      summary: Retrieve a supporter
+      description: Retrieves the details of a specific supporter by ID.
+      responses:
+        '200':
+          description: The requested supporter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supporter'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    EndingBefore:
+      name: ending_before
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records before it.
+      schema:
+        type: string
+    StartingAfter:
+      name: starting_after
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records after it.
+      schema:
+        type: string
+    Id:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier of the resource.
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Number of records to return, from 1 to 100.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+  responses:
+    NotFound:
+      description: The requested resource does not exist.
+    TooManyRequests:
+      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
+    Unauthorized:
+      description: The API key is missing or invalid.
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        has_more:
+          type: boolean
+          description: Whether more records are available beyond this page.
+    Supporter:
+      type: object
+      description: A supporter (donor) record. Field schema to be reconciled against the hosted reference.
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          example: supporter
+      additionalProperties: true
+    SupporterList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Supporter'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key created in the dashboard under Settings > API keys, sent as a Bearer token.

@@ -1,0 +1,811 @@
+openapi: 3.2.0
+info:
+  title: Fundraise Up Fundraisers API
+  description: '1. Overview
+
+    2. Limitations
+
+    3. Key features
+
+    4. Use cases
+
+    5. How to get API key
+
+    6. Managing API keys
+
+    7. Authentication
+
+    8. Parent accounts and subaccounts
+
+    9. Rate limits
+
+    10. Errors
+
+    11. Pagination
+
+    12. Request IDs
+
+    13. Changes in API
+
+
+    ## Overview
+
+
+    The Fundraise Up API gives you more control over your fundraising data. Use it to process offline donations through your Fundraise Up account and keep your CRM or other systems up to date with your fundraising activity. With the API, you can interact with these resources:
+
+
+    - Donations — Create and update donations and their associated recurring plans (within 24 hours of creation, API-created only). - Recurring plans — Read recurring donation schedules. - Supporters — Access supporter details. - Events — Retrieve events from your Audit Log. - Donor Portal access links — Authenticate supporters in the Donor Portal. - Donor Portal recurring plan access links — Provide direct access to recurring plan settings. - Campaigns — List and retrieve campaign details, assign and unassign designations. - Designations — Create, update, delete, and list designations, including batch operations. - Designation groups — List and retrieve designation groups, assign and unassign designations. - Designation configurations — Access relationships between designations and campaigns. - Upgrade links — Generate upgrade links for one-time donations to convert them into recurring plans. ## Limitations
+
+
+    - Most endpoints operate on a single object per request. Designation endpoints support batch operations for up to 100 items. - Updates to Donations and Recurring plans are restricted to the first 24 hours and apply only to API-created donations. - You can retrieve and export data only for Donations, Recurring plans, Supporters, Events, Campaigns, Designations, Designation groups, and Designation configurations. - The API supports the following payment methods: credit cards, debit cards, Apple Pay, Google Pay, ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit). - For ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) donations, Fundraise Up sends the mandate confirmation email to the supporter only when `supporter.email` is provided. Without an email, notifying the supporter about the direct debit mandate is the organization''s responsibility. ## Key features
+
+
+    - Architecture — Built on REST principles. - URLs — Provides predictable, resource-oriented URLs. - Requests — Accepts JSON-encoded request bodies with `Content-Type: application/json` header. - Responses — Returns JSON-encoded responses. - Standards — Uses standard HTTP response codes, authentication, and verbs. ## Use cases
+
+
+    There are a variety of use cases where you can integrate our API into your fundraising flow. In particular, you can use our API for:
+
+
+    - Ticketing and events. - Face-to-face fundraising. - Direct mail campaigns. - Telefundraising. - Fundraising galas and dinners. - Analytics integrations. The API is not intended for migrating subscriptions from legacy systems. For migration purposes, please refer to our Migration service. ## How to get API key
+
+
+    To use the Fundraise Up API, you first need to generate an API key. Only users with the Organization Administrator role can create and manage API keys. Follow these steps to create your API key:
+
+
+    1. Go to **Dashboard** > **Settings** > **API keys**. 2. Click **Create API key**. 3. Enter a descriptive name for your API key. This name helps you identify different keys when you have multiple integrations. 4. Set permissions for your key.'
+  version: 1.0.0
+  contact: {}
+servers: []
+tags:
+- name: Fundraisers
+  description: The Fundraiser object represents a supporter-created fundraising page linked to a campaign. You can create Fundraisers through the API, update them, and retrieve Fundraisers from your account.
+paths:
+  /v1/fundraisers:
+    post:
+      description: This request allows you to create a Fundraiser — a supporter-led fundraising page connected to a specific campaign. Learn more about how Fundraisers work in Fundraise Up.
+      operationId: CreateFundraiser
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFundraiserRequest'
+      responses:
+        '200':
+          description: On success, the API returns the created Fundraiser object. If any parameters are invalid, the request returns an error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFundraiserResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to create Fundraisers.
+      security:
+      - bearer: []
+      summary: Create a Fundraiser
+      tags:
+      - Fundraisers
+    get:
+      description: This request allows you to retrieve Fundraiser records from your Fundraise Up account. Webhooks are not supported.
+      operationId: GetFundraisers
+      parameters:
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Fundraisers only exist in live mode — set this to `true`.
+        schema:
+          example: true
+          type: boolean
+      - name: created
+        required: false
+        in: query
+        schema:
+          $ref: '#/components/schemas/CreatedQuery'
+      - name: starting_after
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records older than the specified object ID.
+        schema:
+          type: string
+      - name: ending_before
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records newer than the specified object ID.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: This parameter specifies the number of records to display per page, ranging from 1 to 100
+        schema:
+          minimum: 1
+          maximum: 100
+          default: 10
+          type: integer
+      responses:
+        '200':
+          description: On success, the API returns an array of Fundraiser objects. If parameters are invalid, the request returns an error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundraisersResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access Fundraisers.
+      security:
+      - bearer: []
+      summary: Get Fundraisers
+      tags:
+      - Fundraisers
+  /v1/fundraisers/{id}:
+    post:
+      description: 'This request allows you to update the details of a Fundraiser.
+
+
+        You can make updates to:
+
+
+        * Enrich data.
+
+        * Modify parameter values.
+
+        * Remove parameter values.
+
+
+        The Fundraiser ID must belong to the account associated with the API key.
+
+
+        Fundraisers from subaccounts cannot be updated using the API key of the parent account. Attempting to do so will result in an error. To update a Fundraiser in a subaccount, you must use the API key of that subaccount.
+
+
+        For the update to succeed, the Fundraiser object must match the current campaign settings; otherwise, the operation will fail with a validation error.
+
+
+        Parallel requests to update the same object are not allowed and will result in an error.
+
+
+        Any parameters or child parameters that are not included will remain unchanged.'
+      operationId: UpdateFundraiser
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the Fundraiser, formatted as N[A-Z]{7}.
+        schema:
+          example: NXXXXXXX
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFundraiserRequest'
+      responses:
+        '200':
+          description: On success, the API returns the Fundraiser object. If parameters are invalid, the call will return an error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFundraiserResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to update Fundraisers.
+      security:
+      - bearer: []
+      summary: Update a Fundraiser
+      tags:
+      - Fundraisers
+    get:
+      description: This request allows you to retrieve a Fundraiser record from your Fundraise Up account. Webhooks are not supported.
+      operationId: GetFundraiser
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the Fundraiser, formatted as N[A-Z]{7}.
+        schema:
+          example: NXXXXXXX
+          type: string
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Fundraisers only exist in live mode — set this to `true`.
+        schema:
+          example: true
+          type: boolean
+      responses:
+        '200':
+          description: On success, the API returns the Fundraiser object. If parameters are invalid, the call will return an error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFundraiserResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access Fundraisers.
+      security:
+      - bearer: []
+      summary: Get a Fundraiser
+      tags:
+      - Fundraisers
+components:
+  schemas:
+    CreateFundraiserRequest:
+      type: object
+      properties:
+        campaign:
+          type: string
+          description: Campaign ID. Must belong to the account that owns the API key, otherwise an error will occur. The campaign must be active and accept money-based donations, otherwise an error will occur.
+          example: FUNXXXXXXXX
+        description:
+          type: string
+          description: Description of the Fundraiser
+          example: I'm raising money to help protect penguins and their habitat. Join me!
+        name:
+          type: string
+          description: The title of the Fundraiser, used as its main heading.
+          example: Run for hope
+        code:
+          type: string
+          description: Identifier of up to 150 characters. Does not need to be unique.
+          example: Winter appeal
+        currency:
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sle
+          - sos
+          - srd
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.
+          example: usd
+        designation:
+          type: string
+          description: Designation ID.
+          example: EXXXXXXX
+        goal:
+          $ref: '#/components/schemas/GoalPostRequest'
+        image:
+          $ref: '#/components/schemas/FundraiserImageRequest'
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Fundraisers only exist in live mode — set this to `true`.
+          example: true
+        slug:
+          type: string
+          description: Unique identifier for the Fundraiser within the account or subaccount. The slug is not shared across accounts or subaccounts and must be unique within each. Can include up to 25 letters, numbers, underscores, or hyphens.
+          example: 5003-000000D8cu_IQAA
+        status:
+          type: string
+          enum:
+          - active
+          - paused
+      description: Contains the request parameters required for creating a Fundraiser.
+      required:
+      - campaign
+      - name
+      - description
+    FundraisersResponse:
+      type: object
+      properties:
+        data:
+          description: An array containing the entity records, paginated by any request parameters.
+          type: array
+          items:
+            $ref: '#/components/schemas/GetFundraiserResponse'
+        has_more:
+          type: boolean
+          description: Indicates whether there are more records available. For `starting_after`, it shows that there is a page with older records. For `ending_before`, it indicates that there is a page with newer records.
+          example: true
+      description: Provides a paginated response for fundraisers.
+      required:
+      - data
+      - has_more
+    FundraiserImageResponse:
+      type: object
+      properties:
+        preview_url:
+          type: string
+          description: URL for the preview image.
+      description: Image details for the Fundraiser, if available.
+      required:
+      - preview_url
+    FundraiserGoalResponse:
+      type: object
+      properties:
+        amount:
+          type: string
+          description: Target amount for the fundraiser.
+        end_date:
+          type: string
+          description: End date for the fundraiser goal.
+      description: Goal details for the Fundraiser, if set.
+      required:
+      - amount
+      - end_date
+    GoalPostRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          description: 'Donation amount in the selected currency. Must be a decimal string in the format `{NNN}[.nn]`. Examples: 9.99 (for USD), 200 (for JPY).
+
+
+            The amount must be greater than $10 or its equivalent in other currencies.'
+          example: '99.99'
+        end_date:
+          type: string
+          description: Date when the goal ends. Must be in YYYY-MM-DD format and set to a future date.
+          example: '2025-01-01'
+      description: Goal for the Fundraiser.
+      required:
+      - amount
+      - end_date
+    DesignationResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Designation code.
+          example: Code-1
+        id:
+          type: string
+          description: Unique designation identifier.
+          example: EXXXXXXX
+        name:
+          type:
+          - string
+          - 'null'
+          description: Designation name.
+          example: My Designation
+      description: Contains information about the designation.
+      required:
+      - id
+      - code
+      - name
+    GetFundraiserResponse:
+      type: object
+      properties:
+        campaign:
+          $ref: '#/components/schemas/CampaignResponse'
+        code:
+          type:
+          - string
+          - 'null'
+          description: Code for the fundraiser, if applicable.
+        created_at:
+          type: string
+          description: Timestamp in ISO 8601 format, indicating when the fundraiser was created in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        currency:
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sle
+          - sos
+          - srd
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.
+          example: usd
+        description:
+          type: string
+          description: Description of the Fundraiser.
+        designation:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/DesignationResponse'
+        goal:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/FundraiserGoalResponse'
+        id:
+          type: string
+          description: Unique identifier for the Fundraiser.
+        image:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/FundraiserImageResponse'
+        name:
+          type: string
+          description: The title of the Fundraiser, used as its main heading.
+          example: Run for hope
+        slug:
+          type:
+          - string
+          - 'null'
+          description: Slug for the Fundraiser, if set.
+        status:
+          type: string
+          enum:
+          - active
+          - paused
+          description: Current status of the Fundraiser.
+      description: Represents a Fundraiser entry in the API.
+      required:
+      - id
+      - slug
+      - status
+      - campaign
+      - name
+      - description
+      - currency
+      - code
+      - goal
+      - designation
+      - image
+      - created_at
+    CampaignResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Campaign code, as set in the Dashboard.
+          example: Code-1
+        id:
+          type: string
+          description: Unique campaign identifier.
+          example: FUNXXXXXXXX
+        name:
+          type: string
+          description: Campaign name.
+          example: My Campaign
+      description: Provides details about the campaign.
+      required:
+      - id
+      - code
+      - name
+    FundraiserImageRequest:
+      type: object
+      properties:
+        upload_url:
+          type: string
+          description: The URL of the fundraiser's image. The image must be accessible with no authentication and validation.
+          example: https://example.com/image.jpg
+      description: Image of the Fundraiser.
+      required:
+      - upload_url
+    CreatedQuery:
+      type: object
+      properties:
+        created[gt]:
+          type: string
+          format: date-time
+          description: Minimum creation date (exclusive). Returns records after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[gte]:
+          type: string
+          format: date-time
+          description: Minimum creation date (inclusive). Returns records from and after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lt]:
+          type: string
+          format: date-time
+          description: Maximum creation date (exclusive). Returns records before this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lte]:
+          type: string
+          format: date-time
+          description: Maximum creation date (inclusive). Returns records up to and including this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+      description: Filters results by the record creation date. Accepts a single date or a date range in RFC 3339 format.
+    UpdateFundraiserRequest:
+      type: object
+      properties:
+        campaign:
+          type: string
+          description: Campaign ID. Must belong to the account that owns the API key, otherwise an error will occur. The campaign must be active and accept money-based donations, otherwise an error will occur.
+          example: FUNXXXXXXXX
+        code:
+          type: string
+          description: Identifier of up to 150 characters. Does not need to be unique.
+          example: Code-1
+        description:
+          type: string
+          description: Description of the Fundraiser
+          example: I'm raising money to help protect penguins and their habitat. Join me!
+        designation:
+          type: string
+          description: Designation ID.
+          example: EXXXXXXX
+        goal:
+          $ref: '#/components/schemas/GoalPostRequest'
+        image:
+          $ref: '#/components/schemas/FundraiserImageRequest'
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Fundraisers only exist in live mode — set this to `true`.
+          example: true
+        name:
+          type: string
+          description: The title of the Fundraiser, used as its main heading.
+          example: Run for hope
+        slug:
+          type: string
+          description: Unique identifier for the Fundraiser within the account or subaccount. The slug is not shared across accounts or subaccounts and must be unique within each. Can include up to 25 letters, numbers, underscores, or hyphens.
+          example: 5003-000000D8cu_IQAA
+        status:
+          type: string
+          enum:
+          - active
+          - paused
+      description: Contains the request parameters required for updating a Fundraiser.
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: API key
+      type: http

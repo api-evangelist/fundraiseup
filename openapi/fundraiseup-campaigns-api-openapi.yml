@@ -1,0 +1,891 @@
+openapi: 3.2.0
+info:
+  title: Fundraise Up Campaigns API
+  description: '1. Overview
+
+    2. Limitations
+
+    3. Key features
+
+    4. Use cases
+
+    5. How to get API key
+
+    6. Managing API keys
+
+    7. Authentication
+
+    8. Parent accounts and subaccounts
+
+    9. Rate limits
+
+    10. Errors
+
+    11. Pagination
+
+    12. Request IDs
+
+    13. Changes in API
+
+
+    ## Overview
+
+
+    The Fundraise Up API gives you more control over your fundraising data. Use it to process offline donations through your Fundraise Up account and keep your CRM or other systems up to date with your fundraising activity. With the API, you can interact with these resources:
+
+
+    - Donations — Create and update donations and their associated recurring plans (within 24 hours of creation, API-created only). - Recurring plans — Read recurring donation schedules. - Supporters — Access supporter details. - Events — Retrieve events from your Audit Log. - Donor Portal access links — Authenticate supporters in the Donor Portal. - Donor Portal recurring plan access links — Provide direct access to recurring plan settings. - Campaigns — List and retrieve campaign details, assign and unassign designations. - Designations — Create, update, delete, and list designations, including batch operations. - Designation groups — List and retrieve designation groups, assign and unassign designations. - Designation configurations — Access relationships between designations and campaigns. - Upgrade links — Generate upgrade links for one-time donations to convert them into recurring plans. ## Limitations
+
+
+    - Most endpoints operate on a single object per request. Designation endpoints support batch operations for up to 100 items. - Updates to Donations and Recurring plans are restricted to the first 24 hours and apply only to API-created donations. - You can retrieve and export data only for Donations, Recurring plans, Supporters, Events, Campaigns, Designations, Designation groups, and Designation configurations. - The API supports the following payment methods: credit cards, debit cards, Apple Pay, Google Pay, ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit). - For ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) donations, Fundraise Up sends the mandate confirmation email to the supporter only when `supporter.email` is provided. Without an email, notifying the supporter about the direct debit mandate is the organization''s responsibility. ## Key features
+
+
+    - Architecture — Built on REST principles. - URLs — Provides predictable, resource-oriented URLs. - Requests — Accepts JSON-encoded request bodies with `Content-Type: application/json` header. - Responses — Returns JSON-encoded responses. - Standards — Uses standard HTTP response codes, authentication, and verbs. ## Use cases
+
+
+    There are a variety of use cases where you can integrate our API into your fundraising flow. In particular, you can use our API for:
+
+
+    - Ticketing and events. - Face-to-face fundraising. - Direct mail campaigns. - Telefundraising. - Fundraising galas and dinners. - Analytics integrations. The API is not intended for migrating subscriptions from legacy systems. For migration purposes, please refer to our Migration service. ## How to get API key
+
+
+    To use the Fundraise Up API, you first need to generate an API key. Only users with the Organization Administrator role can create and manage API keys. Follow these steps to create your API key:
+
+
+    1. Go to **Dashboard** > **Settings** > **API keys**. 2. Click **Create API key**. 3. Enter a descriptive name for your API key. This name helps you identify different keys when you have multiple integrations. 4. Set permissions for your key.'
+  version: 1.0.0
+  contact: {}
+servers: []
+tags:
+- name: Campaigns
+  description: The Campaign object represents a fundraising campaign. Every donation connects to a campaign. It includes settings such as enabled donation frequencies, designation mode, and status.
+paths:
+  /v1/campaigns:
+    get:
+      description: This request allows you to read your Fundraise Up campaign records. Only base campaign types are supported.
+      operationId: GetCampaigns
+      parameters:
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Campaigns only exist in live mode — set this to `true`.
+        schema:
+          example: true
+          type: boolean
+      - name: created
+        required: false
+        in: query
+        schema:
+          $ref: '#/components/schemas/CreatedQuery'
+      - name: starting_after
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records older than the specified object ID.
+        schema:
+          type: string
+      - name: ending_before
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records newer than the specified object ID.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: This parameter specifies the number of records to display per page, ranging from 1 to 100
+        schema:
+          minimum: 1
+          maximum: 100
+          default: 10
+          type: integer
+      - name: account
+        required: false
+        in: query
+        description: The ID of the account to filter by, formatted as [A-Z\d]{8}.
+        schema:
+          type: string
+      - name: designation
+        required: false
+        in: query
+        description: The ID of the designation to filter by, formatted as E[A-Z\d]{7}.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: On success, the API returns the list of campaigns.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access campaigns.
+      security:
+      - bearer: []
+      summary: Get campaigns
+      tags:
+      - Campaigns
+  /v1/campaigns/{id}:
+    get:
+      description: This request allows you to read your Fundraise Up campaign record. Only base campaign types are supported.
+      operationId: GetCampaign
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the campaign, formatted as FUN[A-Z\d]{8}.
+        schema:
+          example: FUNXXXXXXXX
+          type: string
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Campaigns only exist in live mode — set this to `true`.
+        schema:
+          example: true
+          type: boolean
+      responses:
+        '200':
+          description: On success, the API returns the campaign object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignDetailResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access campaigns.
+        '404':
+          description: Resource not found.
+        '422':
+          description: Campaign type not supported.
+      security:
+      - bearer: []
+      summary: Get a campaign
+      tags:
+      - Campaigns
+  /v1/campaigns/{id}/designations/assign:
+    post:
+      description: This request allows you to assign designations to a campaign. Each item is processed independently; the response reports the per-item outcome. Only base campaign types are supported.
+      operationId: AssignDesignationsToCampaign
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the campaign, formatted as FUN[A-Z\d]{8}.
+        schema:
+          example: FUNXXXXXXXX
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignDesignationsRequest'
+      responses:
+        '200':
+          description: On success, the API returns the overall status and a per-item result array describing which designations were assigned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignDesignationsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to manage campaigns.
+        '404':
+          description: Resource not found.
+        '422':
+          description: 'Duplicated ids: The request contains duplicated ids.
+
+            Campaign type not supported.
+
+            Assign-mode limit exceeded: assign-mode campaigns support a maximum of 2 designations per request.
+
+            Designation frequency conflict: in assign mode, a frequency cannot be assigned to more than one designation.'
+      security:
+      - bearer: []
+      summary: Assign designations to a campaign
+      tags:
+      - Campaigns
+  /v1/campaigns/{id}/designations/unassign:
+    post:
+      description: This request allows you to unassign designations from a campaign. Each item is processed independently; the response reports the per-item outcome. Only base campaign types are supported.
+      operationId: UnassignDesignationsFromCampaign
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the campaign, formatted as FUN[A-Z\d]{8}.
+        schema:
+          example: FUNXXXXXXXX
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnassignDesignationsRequest'
+      responses:
+        '200':
+          description: On success, the API returns the overall status and a per-item result array describing which designations were detached.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnassignDesignationsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to manage campaigns.
+        '404':
+          description: Resource not found.
+        '422':
+          description: 'Duplicated ids: The request contains duplicated ids.
+
+            Campaign type not supported.
+
+            Last designation for frequency: at least one designation must remain for every active frequency.
+
+            '
+      security:
+      - bearer: []
+      summary: Unassign designations from a campaign
+      tags:
+      - Campaigns
+components:
+  schemas:
+    UnassignDesignationsRequest:
+      type: object
+      properties:
+        items:
+          minItems: 1
+          maxItems: 100
+          description: An array of designations to unassign.
+          type: array
+          items:
+            $ref: '#/components/schemas/UnassignDesignationItem'
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+          example: true
+      description: Contains the request parameters required for detaching designations from a campaign.
+      required:
+      - items
+    AssignDesignationError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+          - designation_not_found
+          - designation_already_attached
+          - frequency_not_active
+          description: Error code.
+          example: designation_not_found
+        message:
+          type: string
+          description: Error message.
+          example: Designation not found.
+      description: Describes the error that prevented assigning a single designation.
+      required:
+      - code
+      - message
+    CampaignsResponse:
+      type: object
+      properties:
+        data:
+          description: An array containing the campaign records, paginated by any request parameters.
+          type: array
+          items:
+            $ref: '#/components/schemas/CampaignDetailResponse'
+        has_more:
+          type: boolean
+          description: Indicates whether there are more records available. For `starting_after`, it shows that there is a page with older records. For `ending_before`, it indicates that there is a page with newer records.
+          example: true
+      description: Provides a paginated response for campaigns.
+      required:
+      - data
+      - has_more
+    CampaignDetailResponse:
+      type: object
+      properties:
+        account:
+          description: Organization account information.
+          allOf:
+          - $ref: '#/components/schemas/AccountResponse'
+        campaign_page_url:
+          type:
+          - string
+          - 'null'
+          description: Public URL of the campaign page.
+          example: https://org.fundraiseup.com/page/FUNXXXXXXXX
+        code:
+          type:
+          - string
+          - 'null'
+          description: Campaign code, as set in the Dashboard.
+          example: Code-1
+        currency:
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bgn
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - hrk
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mro
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sll
+          - sle
+          - sos
+          - srd
+          - std
+          - svc
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+          - btc
+          - eth
+          - usdt
+          - usdc
+          - sol
+          - dot
+          - doge
+          - shib
+          - ltc
+          - bch
+          - xtz
+          - fil
+          - ftm
+          - gala
+          - paxg
+          - zec
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.
+          example: usd
+        designation_mode:
+          type: string
+          enum:
+          - select
+          - assign
+          description: Designation selection mode.
+          example: select
+        designations:
+          type: array
+          description: Ordered list of designations and designation groups assigned to this campaign. Polymorphic array discriminated by `type` field.
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/CampaignDesignation'
+            - $ref: '#/components/schemas/CampaignDesignationGroup'
+            discriminator:
+              propertyName: type
+              mapping:
+                designation: '#/components/schemas/CampaignDesignation'
+                designation_group: '#/components/schemas/CampaignDesignationGroup'
+        end_date:
+          type:
+          - string
+          - 'null'
+          description: Timestamp in ISO 8601 format, indicating when the campaign ends in UTC. `null` if no end date is set.
+          example: '2026-12-31T00:00:00.000Z'
+        frequencies:
+          description: Active donation frequencies for the campaign.
+          type: array
+          items:
+            $ref: '#/components/schemas/CampaignFrequencyResponse'
+        id:
+          type: string
+          description: Unique campaign identifier.
+          example: FUNXXXXXXXX
+        name:
+          type: string
+          description: Campaign name.
+          example: My Campaign
+        status:
+          type: string
+          enum:
+          - active
+          - disabled
+          - auto_archive
+          description: 'Current status of the campaign: `active` — the campaign accepts donations, `auto_archive` — the campaign is active and will be archived automatically on `end_date`, `disabled` — the campaign is turned off.'
+          example: active
+        tags:
+          description: Campaign tags, as set in the Dashboard.
+          example:
+          - annual
+          - general
+          type: array
+          items:
+            type: string
+      description: Contains campaign record with full details.
+      required:
+      - id
+      - account
+      - code
+      - name
+      - status
+      - end_date
+      - tags
+      - currency
+      - frequencies
+      - designation_mode
+      - designations
+      - campaign_page_url
+    UnassignDesignationResultItem:
+      type: object
+      properties:
+        error:
+          description: Error object. `null` on success.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/UnassignDesignationError'
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+      description: Provides the result of detaching a single designation within a batch request.
+      required:
+      - id
+      - error
+    CampaignDesignation:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Designation code.
+          example: GEN-01
+        frequencies:
+          type: array
+          description: Donation frequencies accepted for this designation in this campaign.
+          example:
+          - once
+          - monthly
+          items:
+            type: string
+            enum:
+            - once
+            - daily
+            - weekly
+            - biweekly
+            - every4weeks
+            - monthly
+            - bimonthly
+            - quarterly
+            - semiannual
+            - annual
+        id:
+          type: string
+          description: Unique designation identifier.
+          example: EXXXXXXX
+        is_default:
+          type: boolean
+          description: Indicates whether this is the pre-selected default designation in this campaign.
+          example: true
+        name:
+          type: string
+          description: Designation name.
+          example: General Fund
+        type:
+          type: string
+          enum:
+          - designation
+          description: Item type discriminator.
+          example: designation
+      description: A designation assigned to the campaign.
+      required:
+      - type
+      - id
+      - name
+      - code
+      - frequencies
+      - is_default
+    AssignDesignationsRequest:
+      type: object
+      properties:
+        items:
+          minItems: 1
+          maxItems: 100
+          description: An array of designations to assign.
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignDesignationItem'
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+          example: true
+      description: Contains the request parameters required for assigning designations to a campaign.
+      required:
+      - items
+    UnassignDesignationItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+      description: Contains the parameters for a single designation to detach from a campaign.
+      required:
+      - id
+    AssignDesignationItem:
+      type: object
+      properties:
+        frequencies:
+          type: array
+          description: Donation frequencies to assign this designation to.
+          example:
+          - once
+          - monthly
+          items:
+            type: string
+            enum:
+            - once
+            - daily
+            - weekly
+            - biweekly
+            - every4weeks
+            - monthly
+            - bimonthly
+            - quarterly
+            - semiannual
+            - annual
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+      description: Contains the parameters for a single designation to assign to a campaign.
+      required:
+      - id
+      - frequencies
+    CampaignFrequencyResponse:
+      type: object
+      properties:
+        minimum_amount:
+          type: string
+          description: Minimum donation amount in the campaign currency.
+          example: '5.00'
+        type:
+          type: string
+          enum:
+          - once
+          - daily
+          - weekly
+          - biweekly
+          - every4weeks
+          - monthly
+          - bimonthly
+          - quarterly
+          - semiannual
+          - annual
+          description: Frequency.
+          example: monthly
+      description: Frequency configuration for the campaign.
+      required:
+      - type
+      - minimum_amount
+    AssignDesignationResultItem:
+      type: object
+      properties:
+        error:
+          description: Error object. `null` on success.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/AssignDesignationError'
+        frequencies:
+          type: array
+          description: Donation frequencies from the request.
+          example:
+          - once
+          - monthly
+          items:
+            type: string
+            enum:
+            - once
+            - daily
+            - weekly
+            - biweekly
+            - every4weeks
+            - monthly
+            - bimonthly
+            - quarterly
+            - semiannual
+            - annual
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+      description: Provides the result of assigning a single designation within a batch request.
+      required:
+      - id
+      - frequencies
+      - error
+    AccountResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Custom identifier for the organization, set as the Account code in the Fundraise Up account.
+          example: Code-1
+        id:
+          type: string
+          description: Unique identifier of the organization in the format A[A-Z]{7}.
+          example: AXXXXXXX
+        name:
+          type: string
+          description: The name of the organization as set in the Fundraise Up account.
+          example: Example Account
+      description: Organization account information.
+      required:
+      - id
+      - code
+      - name
+    CreatedQuery:
+      type: object
+      properties:
+        created[gt]:
+          type: string
+          format: date-time
+          description: Minimum creation date (exclusive). Returns records after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[gte]:
+          type: string
+          format: date-time
+          description: Minimum creation date (inclusive). Returns records from and after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lt]:
+          type: string
+          format: date-time
+          description: Maximum creation date (exclusive). Returns records before this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lte]:
+          type: string
+          format: date-time
+          description: Maximum creation date (inclusive). Returns records up to and including this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+      description: Filters results by the record creation date. Accepts a single date or a date range in RFC 3339 format.
+    AssignDesignationsResponse:
+      type: object
+      properties:
+        results:
+          description: An array containing the result for each item in the request, in the same order.
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignDesignationResultItem'
+        status:
+          type: string
+          enum:
+          - complete
+          - partial
+          - failed
+          description: Status of the bulk operation.
+          example: complete
+      description: Provides the per-item results of a batch designation assignment request.
+      required:
+      - status
+      - results
+    CampaignDesignationGroup:
+      type: object
+      properties:
+        children:
+          type: array
+          description: Designations or nested designation groups.
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/CampaignDesignation'
+            - $ref: '#/components/schemas/CampaignDesignationGroup'
+            discriminator:
+              propertyName: type
+              mapping:
+                designation: '#/components/schemas/CampaignDesignation'
+                designation_group: '#/components/schemas/CampaignDesignationGroup'
+        id:
+          type: string
+          description: Unique designation group identifier.
+          example: LXXXXXXX
+        name:
+          type: string
+          description: Designation group name.
+          example: Education Programs
+        type:
+          type: string
+          enum:
+          - designation_group
+          description: Item type discriminator.
+          example: designation_group
+      description: A designation group assigned to the campaign.
+      required:
+      - type
+      - id
+      - name
+      - children
+    UnassignDesignationError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+          - designation_not_found
+          - designation_not_attached
+          description: Error code.
+          example: designation_not_attached
+        message:
+          type: string
+          description: Error message.
+          example: Designation is not attached to this campaign.
+      description: Describes the error that prevented detaching a single designation.
+      required:
+      - code
+      - message
+    UnassignDesignationsResponse:
+      type: object
+      properties:
+        results:
+          description: An array containing the result for each item in the request, in the same order.
+          type: array
+          items:
+            $ref: '#/components/schemas/UnassignDesignationResultItem'
+        status:
+          type: string
+          enum:
+          - complete
+          - partial
+          - failed
+          description: Status of the bulk operation.
+          example: complete
+      description: Provides the per-item results of a batch designation detachment request.
+      required:
+      - status
+      - results
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: API key
+      type: http

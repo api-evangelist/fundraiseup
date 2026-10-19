@@ -1,0 +1,289 @@
+openapi: 3.2.0
+info:
+  title: Fundraise Up Designation configurations API
+  description: '1. Overview
+
+    2. Limitations
+
+    3. Key features
+
+    4. Use cases
+
+    5. How to get API key
+
+    6. Managing API keys
+
+    7. Authentication
+
+    8. Parent accounts and subaccounts
+
+    9. Rate limits
+
+    10. Errors
+
+    11. Pagination
+
+    12. Request IDs
+
+    13. Changes in API
+
+
+    ## Overview
+
+
+    The Fundraise Up API gives you more control over your fundraising data. Use it to process offline donations through your Fundraise Up account and keep your CRM or other systems up to date with your fundraising activity. With the API, you can interact with these resources:
+
+
+    - Donations — Create and update donations and their associated recurring plans (within 24 hours of creation, API-created only). - Recurring plans — Read recurring donation schedules. - Supporters — Access supporter details. - Events — Retrieve events from your Audit Log. - Donor Portal access links — Authenticate supporters in the Donor Portal. - Donor Portal recurring plan access links — Provide direct access to recurring plan settings. - Campaigns — List and retrieve campaign details, assign and unassign designations. - Designations — Create, update, delete, and list designations, including batch operations. - Designation groups — List and retrieve designation groups, assign and unassign designations. - Designation configurations — Access relationships between designations and campaigns. - Upgrade links — Generate upgrade links for one-time donations to convert them into recurring plans. ## Limitations
+
+
+    - Most endpoints operate on a single object per request. Designation endpoints support batch operations for up to 100 items. - Updates to Donations and Recurring plans are restricted to the first 24 hours and apply only to API-created donations. - You can retrieve and export data only for Donations, Recurring plans, Supporters, Events, Campaigns, Designations, Designation groups, and Designation configurations. - The API supports the following payment methods: credit cards, debit cards, Apple Pay, Google Pay, ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit). - For ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) donations, Fundraise Up sends the mandate confirmation email to the supporter only when `supporter.email` is provided. Without an email, notifying the supporter about the direct debit mandate is the organization''s responsibility. ## Key features
+
+
+    - Architecture — Built on REST principles. - URLs — Provides predictable, resource-oriented URLs. - Requests — Accepts JSON-encoded request bodies with `Content-Type: application/json` header. - Responses — Returns JSON-encoded responses. - Standards — Uses standard HTTP response codes, authentication, and verbs. ## Use cases
+
+
+    There are a variety of use cases where you can integrate our API into your fundraising flow. In particular, you can use our API for:
+
+
+    - Ticketing and events. - Face-to-face fundraising. - Direct mail campaigns. - Telefundraising. - Fundraising galas and dinners. - Analytics integrations. The API is not intended for migrating subscriptions from legacy systems. For migration purposes, please refer to our Migration service. ## How to get API key
+
+
+    To use the Fundraise Up API, you first need to generate an API key. Only users with the Organization Administrator role can create and manage API keys. Follow these steps to create your API key:
+
+
+    1. Go to **Dashboard** > **Settings** > **API keys**. 2. Click **Create API key**. 3. Enter a descriptive name for your API key. This name helps you identify different keys when you have multiple integrations. 4. Set permissions for your key.'
+  version: 1.0.0
+  contact: {}
+servers: []
+tags:
+- name: Designation configurations
+  description: The Designation configuration object represents a single designation configuration.
+paths:
+  /v1/designation_configurations:
+    get:
+      description: Use this request to retrieve a paginated list of designation configurations from your Fundraise Up account. Each configuration represents a relationship between a designation and a campaign, and specifies which payment frequencies are allowed.
+      operationId: GetDesignationConfigurations
+      parameters:
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designation configurations only exist in live mode — set this to `true`.
+        schema:
+          example: true
+          type: boolean
+      - name: starting_after
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records older than the specified object ID.
+        schema:
+          type: string
+      - name: ending_before
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records newer than the specified object ID.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: This parameter specifies the number of records to display per page, ranging from 1 to 100
+        schema:
+          minimum: 1
+          maximum: 100
+          default: 10
+          type: integer
+      - name: campaign
+        required: false
+        in: query
+        description: The ID of the campaign to filter by.
+        schema:
+          type: string
+      - name: designation
+        required: false
+        in: query
+        description: The ID of the designation to filter by.
+        schema:
+          type: string
+      - name: repeat
+        required: false
+        in: query
+        description: Indicates payment types accepted for this designation-campaign combination.
+        schema:
+          example: all
+          type: string
+          enum:
+          - recurring
+          - one-time
+          - all
+      responses:
+        '200':
+          description: On success, the API returns a list of designation configurations. The response includes an array of configuration objects and a boolean indicating whether more records are available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesignationConfigurationsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access designations.
+      security:
+      - bearer: []
+      summary: Get designation configurations
+      tags:
+      - Designation configurations
+  /v1/designation_configurations/{id}:
+    get:
+      description: This request lets you retrieve a single designation configuration. The configuration represents a relationship between a designation and a campaign and includes allowed payment frequencies.
+      operationId: GetDesignationConfiguration
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the designation configuration, formatted as M[A-Z\d]{7}.
+        schema:
+          example: MXXXXXXX
+          type: string
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designation configurations only exist in live mode — set this to `true`.
+        schema:
+          example: true
+          type: boolean
+      responses:
+        '200':
+          description: On success, the API returns the designation configuration object. If the provided identifier is invalid, the request returns an error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesignationConfigurationResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access designations.
+      security:
+      - bearer: []
+      summary: Get a designation configuration
+      tags:
+      - Designation configurations
+components:
+  schemas:
+    DesignationConfigurationResponse:
+      type: object
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountResponse'
+        campaign:
+          $ref: '#/components/schemas/CampaignResponse'
+        created_at:
+          type: string
+          description: Timestamp in ISO 8601 format, indicating when the configuration was created in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        designation:
+          $ref: '#/components/schemas/DesignationResponse'
+        id:
+          type: string
+          description: Unique identifier for the designation configuration.
+          example: MXXXXXXX
+        repeat:
+          type: string
+          enum:
+          - recurring
+          - one-time
+          - all
+          description: Indicates payment types accepted for this designation-campaign combination.
+          example: all
+      description: Contains designation configuration record with full details.
+      required:
+      - id
+      - created_at
+      - repeat
+      - campaign
+      - designation
+      - account
+    DesignationResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Designation code.
+          example: Code-1
+        id:
+          type: string
+          description: Unique designation identifier.
+          example: EXXXXXXX
+        name:
+          type:
+          - string
+          - 'null'
+          description: Designation name.
+          example: My Designation
+      description: Contains information about the designation.
+      required:
+      - id
+      - code
+      - name
+    DesignationConfigurationsResponse:
+      type: object
+      properties:
+        data:
+          description: An array containing the entity records, paginated by any request parameters.
+          type: array
+          items:
+            $ref: '#/components/schemas/DesignationConfigurationResponse'
+        has_more:
+          type: boolean
+          description: Indicates whether there are more records available. For `starting_after`, it shows that there is a page with older records. For `ending_before`, it indicates that there is a page with newer records.
+          example: true
+      description: Provides a paginated response for designation configurations.
+      required:
+      - data
+      - has_more
+    CampaignResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Campaign code, as set in the Dashboard.
+          example: Code-1
+        id:
+          type: string
+          description: Unique campaign identifier.
+          example: FUNXXXXXXXX
+        name:
+          type: string
+          description: Campaign name.
+          example: My Campaign
+      description: Provides details about the campaign.
+      required:
+      - id
+      - code
+      - name
+    AccountResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Custom identifier for the organization, set as the Account code in the Fundraise Up account.
+          example: Code-1
+        id:
+          type: string
+          description: Unique identifier of the organization in the format A[A-Z]{7}.
+          example: AXXXXXXX
+        name:
+          type: string
+          description: The name of the organization as set in the Fundraise Up account.
+          example: Example Account
+      description: Organization account information.
+      required:
+      - id
+      - code
+      - name
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: API key
+      type: http

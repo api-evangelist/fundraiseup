@@ -1,28 +1,28 @@
 {
   "provider": "fundraiseup",
   "sources": [
-    "_original/fundraiseup-openapi.yml"
+    "_original/fundraiseup-openapi.json"
   ],
   "outputs": [
+    "fundraiseup-access-links-api-openapi.yml",
+    "fundraiseup-campaigns-api-openapi.yml",
+    "fundraiseup-designation-configurations-api-openapi.yml",
+    "fundraiseup-designation-groups-api-openapi.yml",
+    "fundraiseup-designations-api-openapi.yml",
     "fundraiseup-donations-api-openapi.yml",
-    "fundraiseup-donor-portal-api-openapi.yml",
     "fundraiseup-events-api-openapi.yml",
+    "fundraiseup-fundraisers-api-openapi.yml",
     "fundraiseup-recurring-plans-api-openapi.yml",
-    "fundraiseup-supporters-api-openapi.yml"
+    "fundraiseup-supporters-api-openapi.yml",
+    "fundraiseup-upgrade-links-api-openapi.yml"
   ],
   "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
     "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
-    "fundraiseup-openapi.yml: upgraded openapi 3.0.3 -> OpenAPI 3.2.0",
-    "apis.yml register: already-registered"
+    "fundraiseup-openapi.json: upgraded openapi 3.0.0 -> OpenAPI 3.2.0",
+    "apis.yml register: written (+7 apis, 11 total)"
   ],
-  "skipped": [
-    "fundraiseup-donations-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "fundraiseup-donor-portal-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "fundraiseup-events-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "fundraiseup-recurring-plans-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "fundraiseup-supporters-api-openapi.yml: previously refined output, superseded by openapi/_original/"
-  ]
+  "skipped": []
 }

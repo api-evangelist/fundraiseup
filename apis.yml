@@ -78,28 +78,6 @@ apis:
     url: https://fundraiseup.com/support/api-event-types/
   - type: Documentation
     url: https://fundraiseup.com/docs/seamless-donor-portal/
-- aid: fundraiseup:fundraiseup-donor-portal-api
-  name: Fundraise Up Donor Portal API
-  description: Secure access-link generation for the self-service Donor Portal.
-  humanURL: https://api.fundraiseup.com/v1/docs/
-  baseURL: https://api.fundraiseup.com/v1
-  tags:
-  - Donor Portal
-  properties:
-  - type: OpenAPI
-    url: openapi/fundraiseup-donor-portal-api-openapi.yml
-  - type: Documentation
-    url: https://fundraiseup.com/docs/rest-api/
-  - type: APIReference
-    url: https://api.fundraiseup.com/v1/docs/
-  - type: PostmanCollection
-    url: collections/fundraiseup.postman_collection.json
-  - type: OpenCollection
-    url: collections/fundraiseup.opencollection.json
-  - type: Documentation
-    url: https://fundraiseup.com/support/api-event-types/
-  - type: Documentation
-    url: https://fundraiseup.com/docs/seamless-donor-portal/
 - aid: fundraiseup:fundraiseup-events-api
   name: Fundraise Up Events API
   description: Audit-log events across donations, recurring plans, tributes, and supporters.
@@ -156,6 +134,171 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/fundraiseup-supporters-api-openapi.yml
+  - type: Documentation
+    url: https://fundraiseup.com/docs/rest-api/
+  - type: APIReference
+    url: https://api.fundraiseup.com/v1/docs/
+  - type: PostmanCollection
+    url: collections/fundraiseup.postman_collection.json
+  - type: OpenCollection
+    url: collections/fundraiseup.opencollection.json
+  - type: Documentation
+    url: https://fundraiseup.com/support/api-event-types/
+  - type: Documentation
+    url: https://fundraiseup.com/docs/seamless-donor-portal/
+- aid: fundraiseup:fundraiseup-access-links-api
+  name: Fundraise Up Access links API
+  description: >-
+    The Access link object represents link that grant supporter access to their Donor Portal.
+  humanURL: https://api.fundraiseup.com/v1/docs/
+  baseURL: https://api.fundraiseup.com/v1
+  tags:
+  - Access links
+  properties:
+  - type: OpenAPI
+    url: openapi/fundraiseup-access-links-api-openapi.yml
+  - type: Documentation
+    url: https://fundraiseup.com/docs/rest-api/
+  - type: APIReference
+    url: https://api.fundraiseup.com/v1/docs/
+  - type: PostmanCollection
+    url: collections/fundraiseup.postman_collection.json
+  - type: OpenCollection
+    url: collections/fundraiseup.opencollection.json
+  - type: Documentation
+    url: https://fundraiseup.com/support/api-event-types/
+  - type: Documentation
+    url: https://fundraiseup.com/docs/seamless-donor-portal/
+- aid: fundraiseup:fundraiseup-campaigns-api
+  name: Fundraise Up Campaigns API
+  description: >-
+    The Campaign object represents a fundraising campaign. Every donation connects to a campaign. It includes
+    settings such as enabled donation frequencies, designation mode, and status.
+  humanURL: https://api.fundraiseup.com/v1/docs/
+  baseURL: https://api.fundraiseup.com/v1
+  tags:
+  - Campaigns
+  properties:
+  - type: OpenAPI
+    url: openapi/fundraiseup-campaigns-api-openapi.yml
+  - type: Documentation
+    url: https://fundraiseup.com/docs/rest-api/
+  - type: APIReference
+    url: https://api.fundraiseup.com/v1/docs/
+  - type: PostmanCollection
+    url: collections/fundraiseup.postman_collection.json
+  - type: OpenCollection
+    url: collections/fundraiseup.opencollection.json
+  - type: Documentation
+    url: https://fundraiseup.com/support/api-event-types/
+  - type: Documentation
+    url: https://fundraiseup.com/docs/seamless-donor-portal/
+- aid: fundraiseup:fundraiseup-designation-configurations-api
+  name: Fundraise Up Designation configurations API
+  description: The Designation configuration object represents a single designation configuration.
+  humanURL: https://api.fundraiseup.com/v1/docs/
+  baseURL: https://api.fundraiseup.com/v1
+  tags:
+  - Designation configurations
+  properties:
+  - type: OpenAPI
+    url: openapi/fundraiseup-designation-configurations-api-openapi.yml
+  - type: Documentation
+    url: https://fundraiseup.com/docs/rest-api/
+  - type: APIReference
+    url: https://api.fundraiseup.com/v1/docs/
+  - type: PostmanCollection
+    url: collections/fundraiseup.postman_collection.json
+  - type: OpenCollection
+    url: collections/fundraiseup.opencollection.json
+  - type: Documentation
+    url: https://fundraiseup.com/support/api-event-types/
+  - type: Documentation
+    url: https://fundraiseup.com/docs/seamless-donor-portal/
+- aid: fundraiseup:fundraiseup-designation-groups-api
+  name: Fundraise Up Designation groups API
+  description: >-
+    The Designation group object represents a container for related designations and other designation
+    groups in your Fundraise Up account.
+  humanURL: https://api.fundraiseup.com/v1/docs/
+  baseURL: https://api.fundraiseup.com/v1
+  tags:
+  - Designation groups
+  properties:
+  - type: OpenAPI
+    url: openapi/fundraiseup-designation-groups-api-openapi.yml
+  - type: Documentation
+    url: https://fundraiseup.com/docs/rest-api/
+  - type: APIReference
+    url: https://api.fundraiseup.com/v1/docs/
+  - type: PostmanCollection
+    url: collections/fundraiseup.postman_collection.json
+  - type: OpenCollection
+    url: collections/fundraiseup.opencollection.json
+  - type: Documentation
+    url: https://fundraiseup.com/support/api-event-types/
+  - type: Documentation
+    url: https://fundraiseup.com/docs/seamless-donor-portal/
+- aid: fundraiseup:fundraiseup-designations-api
+  name: Fundraise Up Designations API
+  description: >-
+    The Designation object represents a fund allocation for a donation, such as restricted or unrestricted
+    giving.
+  humanURL: https://api.fundraiseup.com/v1/docs/
+  baseURL: https://api.fundraiseup.com/v1
+  tags:
+  - Designations
+  properties:
+  - type: OpenAPI
+    url: openapi/fundraiseup-designations-api-openapi.yml
+  - type: Documentation
+    url: https://fundraiseup.com/docs/rest-api/
+  - type: APIReference
+    url: https://api.fundraiseup.com/v1/docs/
+  - type: PostmanCollection
+    url: collections/fundraiseup.postman_collection.json
+  - type: OpenCollection
+    url: collections/fundraiseup.opencollection.json
+  - type: Documentation
+    url: https://fundraiseup.com/support/api-event-types/
+  - type: Documentation
+    url: https://fundraiseup.com/docs/seamless-donor-portal/
+- aid: fundraiseup:fundraiseup-fundraisers-api
+  name: Fundraise Up Fundraisers API
+  description: >-
+    The Fundraiser object represents a supporter-created fundraising page linked to a campaign. You can
+    create Fundraisers through the API, update them, and retrieve Fundraisers from your account.
+  humanURL: https://api.fundraiseup.com/v1/docs/
+  baseURL: https://api.fundraiseup.com/v1
+  tags:
+  - Fundraisers
+  properties:
+  - type: OpenAPI
+    url: openapi/fundraiseup-fundraisers-api-openapi.yml
+  - type: Documentation
+    url: https://fundraiseup.com/docs/rest-api/
+  - type: APIReference
+    url: https://api.fundraiseup.com/v1/docs/
+  - type: PostmanCollection
+    url: collections/fundraiseup.postman_collection.json
+  - type: OpenCollection
+    url: collections/fundraiseup.opencollection.json
+  - type: Documentation
+    url: https://fundraiseup.com/support/api-event-types/
+  - type: Documentation
+    url: https://fundraiseup.com/docs/seamless-donor-portal/
+- aid: fundraiseup:fundraiseup-upgrade-links-api
+  name: Fundraise Up Upgrade links API
+  description: >-
+    The Upgrade link object represents a one-time link that directs a supporter to a page where they can
+    start a recurring plan based on their original one-time donation.
+  humanURL: https://api.fundraiseup.com/v1/docs/
+  baseURL: https://api.fundraiseup.com/v1
+  tags:
+  - Upgrade links
+  properties:
+  - type: OpenAPI
+    url: openapi/fundraiseup-upgrade-links-api-openapi.yml
   - type: Documentation
     url: https://fundraiseup.com/docs/rest-api/
   - type: APIReference

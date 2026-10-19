@@ -1,0 +1,12 @@
+{
+ "url": "https://api.fundraiseup.com/v1/openapi.json",
+ "final": "https://api.fundraiseup.com/v1/openapi.json",
+ "status": 200,
+ "content_type": "application/json; charset=utf-8",
+ "bytes": 209853,
+ "sha256": "9160ff80d97c4a0b0ad2caca6fe9d2f880ed8a41134c8036926b7950d45b819f",
+ "fetched_at": "2026-10-19",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "byte-identical",
+ "note": "re-archived: the provider's current document replaced a stale archive (roadmap#793); the old files are in openapi/_superseded/2026-10-19-stale"
+}

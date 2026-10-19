@@ -1,136 +1,379 @@
 openapi: 3.2.0
 info:
-  title: Fundraise Up REST Events API
-  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account.
-  version: '1.0'
-  contact:
-    name: Fundraise Up
-    url: https://fundraiseup.com
-  license:
-    name: Proprietary
-    url: https://fundraiseup.com/terms/
-servers:
-- url: https://api.fundraiseup.com/v1
-  description: Fundraise Up REST API
-security:
-- bearerAuth: []
+  title: Fundraise Up Events API
+  description: '1. Overview
+
+    2. Limitations
+
+    3. Key features
+
+    4. Use cases
+
+    5. How to get API key
+
+    6. Managing API keys
+
+    7. Authentication
+
+    8. Parent accounts and subaccounts
+
+    9. Rate limits
+
+    10. Errors
+
+    11. Pagination
+
+    12. Request IDs
+
+    13. Changes in API
+
+
+    ## Overview
+
+
+    The Fundraise Up API gives you more control over your fundraising data. Use it to process offline donations through your Fundraise Up account and keep your CRM or other systems up to date with your fundraising activity. With the API, you can interact with these resources:
+
+
+    - Donations — Create and update donations and their associated recurring plans (within 24 hours of creation, API-created only). - Recurring plans — Read recurring donation schedules. - Supporters — Access supporter details. - Events — Retrieve events from your Audit Log. - Donor Portal access links — Authenticate supporters in the Donor Portal. - Donor Portal recurring plan access links — Provide direct access to recurring plan settings. - Campaigns — List and retrieve campaign details, assign and unassign designations. - Designations — Create, update, delete, and list designations, including batch operations. - Designation groups — List and retrieve designation groups, assign and unassign designations. - Designation configurations — Access relationships between designations and campaigns. - Upgrade links — Generate upgrade links for one-time donations to convert them into recurring plans. ## Limitations
+
+
+    - Most endpoints operate on a single object per request. Designation endpoints support batch operations for up to 100 items. - Updates to Donations and Recurring plans are restricted to the first 24 hours and apply only to API-created donations. - You can retrieve and export data only for Donations, Recurring plans, Supporters, Events, Campaigns, Designations, Designation groups, and Designation configurations. - The API supports the following payment methods: credit cards, debit cards, Apple Pay, Google Pay, ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit). - For ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) donations, Fundraise Up sends the mandate confirmation email to the supporter only when `supporter.email` is provided. Without an email, notifying the supporter about the direct debit mandate is the organization''s responsibility. ## Key features
+
+
+    - Architecture — Built on REST principles. - URLs — Provides predictable, resource-oriented URLs. - Requests — Accepts JSON-encoded request bodies with `Content-Type: application/json` header. - Responses — Returns JSON-encoded responses. - Standards — Uses standard HTTP response codes, authentication, and verbs. ## Use cases
+
+
+    There are a variety of use cases where you can integrate our API into your fundraising flow. In particular, you can use our API for:
+
+
+    - Ticketing and events. - Face-to-face fundraising. - Direct mail campaigns. - Telefundraising. - Fundraising galas and dinners. - Analytics integrations. The API is not intended for migrating subscriptions from legacy systems. For migration purposes, please refer to our Migration service. ## How to get API key
+
+
+    To use the Fundraise Up API, you first need to generate an API key. Only users with the Organization Administrator role can create and manage API keys. Follow these steps to create your API key:
+
+
+    1. Go to **Dashboard** > **Settings** > **API keys**. 2. Click **Create API key**. 3. Enter a descriptive name for your API key. This name helps you identify different keys when you have multiple integrations. 4. Set permissions for your key.'
+  version: 1.0.0
+  contact: {}
+servers: []
 tags:
 - name: Events
-  description: Audit-log events across donations, recurring plans, tributes, and supporters.
+  description: The Event object represents each entry in your Audit Log, allowing you to track changes in your account.
 paths:
-  /events:
+  /v1/events:
     get:
-      operationId: listEvents
-      tags:
-      - Events
-      summary: List events
-      description: Retrieves audit-log events across donations, transaction attempts, recurring plans, tributes, and supporters, with cursor-based pagination.
+      description: 'This request helps you track updates and changes in your account in the same way as in the Audit Log. While the `Donations` endpoint shows the current state of a donation when queried, it doesn''t reflect changes that happen after the initial creation (for example, finalized fees or status updates). The `Events` endpoint logs all updates as they occur, giving you the most current view of activity when you query it.
+
+
+        ### Use cases
+
+        - **Retrieving finalized fees**. The `platform_fee` field in a donation will initially show 0 until Stripe finalizes the fee data. To get the updated fee values, use the `Events` endpoint to track the `donation.success` event, which confirms that the finalized fees have been updated.
+
+        - **Monitoring donation status changes**. Donations can move through multiple statuses — `pending`, `success`, `failed`, and more. Use the `Events` endpoint to track status changes. For example, a donation might be `pending` while awaiting payment processor confirmation and later transition to `success` or `failed`.
+
+        - **Tracking refunds and disputes**. If a donation is refunded or disputed, you''ll receive corresponding events like `donation.refunded`, `donation.success_dispute_created`, or `donation.success_dispute_won`. This helps keep your records accurate without manually checking each donation.
+
+        - **Handling recurring plan updates**. Recurring donations generate events like `recurring_plan.activated`, `recurring_plan.failed`, or `recurring_plan.canceled`. Monitoring these events allows you to track subscription activities and take appropriate actions if a recurring payment fails or is canceled.
+
+        - **Updating supporter information**. When a supporter updates their information or requests personal data deletion, events like `supporter.updated` or `supporter.personal_data_deleted` are triggered. This is especially important for maintaining compliance with data protection regulations.
+
+        - **Monitoring tribute activity**. Use events like `tribute.created` or `tribute.updated` to keep track of tribute donations and ensure that tribute cards are sent as expected (`tribute.shared`).'
+      operationId: GetEvents
       parameters:
-      - $ref: '#/components/parameters/Limit'
-      - $ref: '#/components/parameters/StartingAfter'
-      - $ref: '#/components/parameters/EndingBefore'
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+        schema:
+          example: true
+          type: boolean
+      - name: created
+        required: false
+        in: query
+        schema:
+          $ref: '#/components/schemas/CreatedQuery'
+      - name: starting_after
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records older than the specified object ID.
+        schema:
+          type: string
+      - name: ending_before
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records newer than the specified object ID.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: This parameter specifies the number of records to display per page, ranging from 1 to 100
+        schema:
+          minimum: 1
+          maximum: 100
+          default: 10
+          type: integer
+      - name: types
+        required: false
+        in: query
+        description: 'An optional array of up to 10 strings containing specific event types. The response will include only events with a matching type. Passing more than 10 values results in an error. Not passing this parameter will return all event types.
+
+
+          Available event types include donation events (for example, `donation.created`), recurring plan events (for example, `recurring_plan.activated`), transaction attempt events (for example, `transaction_attempt.success`), benefit events (for example, `donation_benefit.updated`), tribute events (for example, `tribute.created`), and supporter events (for example, `supporter.created`).
+
+
+          [Event types explained](https://fundraiseup.com/support/api-event-types/).'
+        schema:
+          example:
+          - donation.created
+          - donation.success
+          - donation.failed
+          type: array
+          items:
+            type: string
+            enum:
+            - donation.created
+            - donation.success
+            - donation.pending
+            - donation.failed
+            - donation.updated
+            - donation.refunded
+            - donation.success_early_fraud_warning
+            - donation.pending_ach_verification_required
+            - donation.pending_incomplete
+            - donation.pending_scheduled
+            - donation.pending_waiting_for_transfer
+            - donation.pending_paypal_action_required
+            - donation.pending_retrying
+            - donation.personal_data_deleted
+            - donation_benefit.updated
+            - donation.success_dispute_created
+            - donation.success_dispute_lost
+            - donation.success_dispute_won
+            - donation.success_dispute_in_review
+            - recurring_plan.activated
+            - recurring_plan.scheduled
+            - recurring_plan.failed
+            - recurring_plan.completed
+            - recurring_plan.canceled
+            - recurring_plan.terms_updated
+            - recurring_plan.paused
+            - recurring_plan.retrying
+            - recurring_plan.details_updated
+            - recurring_plan.personal_data_deleted
+            - recurring_plan.reactivated_as_new_plan
+            - transaction_attempt.pending
+            - transaction_attempt.success
+            - transaction_attempt.failed
+            - tribute.created
+            - tribute.updated
+            - tribute.shared
+            - tribute.personal_data_deleted
+            - supporter.created
+            - supporter.personal_data_deleted
+            - supporter.updated
       responses:
         '200':
-          description: A paginated list of events.
+          description: On success, the API returns the list of events. The response includes the event data array and a boolean indicating if more records are available.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EventList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '429':
-          $ref: '#/components/responses/TooManyRequests'
-  /events/{id}:
-    parameters:
-    - $ref: '#/components/parameters/Id'
-    get:
-      operationId: getEvent
+                $ref: '#/components/schemas/EventsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access events.
+      security:
+      - bearer: []
+      summary: Get events
       tags:
       - Events
-      summary: Retrieve an event
-      description: Retrieves the details of a specific event by ID.
-      responses:
-        '200':
-          description: The requested event.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Event'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
 components:
-  parameters:
-    EndingBefore:
-      name: ending_before
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records before it.
-      schema:
-        type: string
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
-      schema:
-        type: string
-    Id:
-      name: id
-      in: path
-      required: true
-      description: The unique identifier of the resource.
-      schema:
-        type: string
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: Number of records to return, from 1 to 100.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-  responses:
-    NotFound:
-      description: The requested resource does not exist.
-    TooManyRequests:
-      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
-    Unauthorized:
-      description: The API key is missing or invalid.
   schemas:
-    Event:
+    EventResponse:
       type: object
-      description: An audit-log event. Field schema to be reconciled against the hosted reference.
       properties:
+        account:
+          $ref: '#/components/schemas/AccountResponse'
+        created_at:
+          type: string
+          description: Timestamp in ISO 8601 format, indicating when the event was created in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        donation:
+          type:
+          - string
+          - 'null'
+          deprecated: true
+          description: Deprecated. This field is kept for backward compatibility and will be removed after 2026-10-30. Use the payments array instead. See the migration guide.
+          example: DXXXXXXX
         id:
           type: string
-        object:
-          type: string
-          example: event
+          description: Unique identifier for the event.
+          example: 66911bb67616b5001045cccc
+        livemode:
+          type: boolean
+          description: Test mode indicator. `true` for live mode donations, `false` for test mode donations.
+          example: true
+        payments:
+          description: 'An array of donations and recurring plans associated with the event.  Example: [{ "donation": "DXXXXXXX", recurring_plan: "RXXXXXXX" }]."'
+          example:
+          - donation: DXXXXXXX
+            recurring_plan: RXXXXXXX
+          type: array
+          items:
+            $ref: '#/components/schemas/EventPaymentItem'
+        recurring_plan:
+          type:
+          - string
+          - 'null'
+          deprecated: true
+          description: Deprecated. This field is kept for backward compatibility and will be removed after 2026-10-30. Use the payments array instead. See the migration guide.
+          example: RXXXXXXX
+        supporter:
+          type:
+          - string
+          - 'null'
+          description: 'Unique ID of the related supporter. Example events: `donation.personal_data_deleted`.'
+          example: SWXXXXXX
         type:
           type: string
-          description: The event type, for example donation.success or recurring_plan.activated.
-      additionalProperties: true
-    EventList:
-      allOf:
-      - $ref: '#/components/schemas/Pagination'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Event'
-    Pagination:
+          enum:
+          - donation.created
+          - donation.success
+          - donation.pending
+          - donation.failed
+          - donation.updated
+          - donation.refunded
+          - donation.success_early_fraud_warning
+          - donation.pending_ach_verification_required
+          - donation.pending_incomplete
+          - donation.pending_scheduled
+          - donation.pending_waiting_for_transfer
+          - donation.pending_paypal_action_required
+          - donation.pending_retrying
+          - donation.personal_data_deleted
+          - donation_benefit.updated
+          - donation.success_dispute_created
+          - donation.success_dispute_lost
+          - donation.success_dispute_won
+          - donation.success_dispute_in_review
+          - recurring_plan.activated
+          - recurring_plan.scheduled
+          - recurring_plan.failed
+          - recurring_plan.completed
+          - recurring_plan.canceled
+          - recurring_plan.terms_updated
+          - recurring_plan.paused
+          - recurring_plan.retrying
+          - recurring_plan.details_updated
+          - recurring_plan.personal_data_deleted
+          - recurring_plan.reactivated_as_new_plan
+          - transaction_attempt.pending
+          - transaction_attempt.success
+          - transaction_attempt.failed
+          - tribute.created
+          - tribute.updated
+          - tribute.shared
+          - tribute.personal_data_deleted
+          - supporter.created
+          - supporter.personal_data_deleted
+          - supporter.updated
+          description: 'Type of event that occurred in the system. Include donation events (for example, `donation.created`), recurring plan events (for example, `recurring_plan.activated`), transaction attempt events (for example, `transaction_attempt.success`), tribute events (for example, `tribute.created`), and supporter events (for example, `supporter.created`).
+
+
+            [Event types explained](https://fundraiseup.com/support/api-event-types/)'
+          example: donation.created
+      description: Provides detailed information about a specific event that occurred in the system, such as donation creation or recurring plan updates.
+      required:
+      - id
+      - created_at
+      - account
+      - livemode
+      - type
+      - donation
+      - recurring_plan
+      - supporter
+      - payments
+    AccountResponse:
       type: object
       properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Custom identifier for the organization, set as the Account code in the Fundraise Up account.
+          example: Code-1
+        id:
+          type: string
+          description: Unique identifier of the organization in the format A[A-Z]{7}.
+          example: AXXXXXXX
+        name:
+          type: string
+          description: The name of the organization as set in the Fundraise Up account.
+          example: Example Account
+      description: Organization account information.
+      required:
+      - id
+      - code
+      - name
+    EventsResponse:
+      type: object
+      properties:
+        data:
+          description: An array containing the entity records, paginated by any request parameters.
+          type: array
+          items:
+            $ref: '#/components/schemas/EventResponse'
         has_more:
           type: boolean
-          description: Whether more records are available beyond this page.
+          description: Indicates whether there are more records available. For `starting_after`, it shows that there is a page with older records. For `ending_before`, it indicates that there is a page with newer records.
+          example: true
+      description: Contains the response for a list of events, including paginated event data and metadata indicating if more records are available.
+      required:
+      - data
+      - has_more
+    EventPaymentItem:
+      type: object
+      properties:
+        donation:
+          type:
+          - string
+          - 'null'
+          description: Donation identifier, formatted as D[A-Z\d]{7}.
+          example: D1AB2CD3
+        recurring_plan:
+          type:
+          - string
+          - 'null'
+          description: Recurring plan identifier, formatted as R[A-Z\d]{7}.
+          example: R1AB2CD3
+      required:
+      - donation
+      - recurring_plan
+    CreatedQuery:
+      type: object
+      properties:
+        created[gt]:
+          type: string
+          format: date-time
+          description: Minimum creation date (exclusive). Returns records after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[gte]:
+          type: string
+          format: date-time
+          description: Minimum creation date (inclusive). Returns records from and after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lt]:
+          type: string
+          format: date-time
+          description: Maximum creation date (exclusive). Returns records before this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lte]:
+          type: string
+          format: date-time
+          description: Maximum creation date (inclusive). Returns records up to and including this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+      description: Filters results by the record creation date. Accepts a single date or a date range in RFC 3339 format.
   securitySchemes:
-    bearerAuth:
-      type: http
+    bearer:
       scheme: bearer
-      description: API key created in the dashboard under Settings > API keys, sent as a Bearer token.
+      bearerFormat: API key
+      type: http

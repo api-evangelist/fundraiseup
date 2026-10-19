@@ -1,0 +1,110 @@
+openapi: 3.2.0
+info:
+  title: Fundraise Up Upgrade links API
+  description: '1. Overview
+
+    2. Limitations
+
+    3. Key features
+
+    4. Use cases
+
+    5. How to get API key
+
+    6. Managing API keys
+
+    7. Authentication
+
+    8. Parent accounts and subaccounts
+
+    9. Rate limits
+
+    10. Errors
+
+    11. Pagination
+
+    12. Request IDs
+
+    13. Changes in API
+
+
+    ## Overview
+
+
+    The Fundraise Up API gives you more control over your fundraising data. Use it to process offline donations through your Fundraise Up account and keep your CRM or other systems up to date with your fundraising activity. With the API, you can interact with these resources:
+
+
+    - Donations — Create and update donations and their associated recurring plans (within 24 hours of creation, API-created only). - Recurring plans — Read recurring donation schedules. - Supporters — Access supporter details. - Events — Retrieve events from your Audit Log. - Donor Portal access links — Authenticate supporters in the Donor Portal. - Donor Portal recurring plan access links — Provide direct access to recurring plan settings. - Campaigns — List and retrieve campaign details, assign and unassign designations. - Designations — Create, update, delete, and list designations, including batch operations. - Designation groups — List and retrieve designation groups, assign and unassign designations. - Designation configurations — Access relationships between designations and campaigns. - Upgrade links — Generate upgrade links for one-time donations to convert them into recurring plans. ## Limitations
+
+
+    - Most endpoints operate on a single object per request. Designation endpoints support batch operations for up to 100 items. - Updates to Donations and Recurring plans are restricted to the first 24 hours and apply only to API-created donations. - You can retrieve and export data only for Donations, Recurring plans, Supporters, Events, Campaigns, Designations, Designation groups, and Designation configurations. - The API supports the following payment methods: credit cards, debit cards, Apple Pay, Google Pay, ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit). - For ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) donations, Fundraise Up sends the mandate confirmation email to the supporter only when `supporter.email` is provided. Without an email, notifying the supporter about the direct debit mandate is the organization''s responsibility. ## Key features
+
+
+    - Architecture — Built on REST principles. - URLs — Provides predictable, resource-oriented URLs. - Requests — Accepts JSON-encoded request bodies with `Content-Type: application/json` header. - Responses — Returns JSON-encoded responses. - Standards — Uses standard HTTP response codes, authentication, and verbs. ## Use cases
+
+
+    There are a variety of use cases where you can integrate our API into your fundraising flow. In particular, you can use our API for:
+
+
+    - Ticketing and events. - Face-to-face fundraising. - Direct mail campaigns. - Telefundraising. - Fundraising galas and dinners. - Analytics integrations. The API is not intended for migrating subscriptions from legacy systems. For migration purposes, please refer to our Migration service. ## How to get API key
+
+
+    To use the Fundraise Up API, you first need to generate an API key. Only users with the Organization Administrator role can create and manage API keys. Follow these steps to create your API key:
+
+
+    1. Go to **Dashboard** > **Settings** > **API keys**. 2. Click **Create API key**. 3. Enter a descriptive name for your API key. This name helps you identify different keys when you have multiple integrations. 4. Set permissions for your key.'
+  version: 1.0.0
+  contact: {}
+servers: []
+tags:
+- name: Upgrade links
+  description: The Upgrade link object represents a one-time link that directs a supporter to a page where they can start a recurring plan based on their original one-time donation.
+paths:
+  /v1/upgrade_links/donations/{id}:
+    post:
+      description: 'Generates a one-time Upgrade Link for a specific one-time donation. The link directs the supporter to a page where they can start a recurring plan based on their original donation. Links are permanent and signature-authenticated — no login required.
+
+
+        To call this endpoint, your API key must have the **Upgrade Links — Write** permission.
+
+
+        Parent accounts cannot use their API keys to create upgrade links for subaccounts. To create upgrade links for a subaccount, generate an API key within that specific subaccount and use it.'
+      operationId: CreateUpgradeLink
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: One-time donation ID in the format D[A-Z]{7}. The donation must be eligible for upgrade.
+        schema:
+          example: DXXXXXXX
+          type: string
+      responses:
+        '200':
+          description: Upgrade link generated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpgradeLinkResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to perform this operation.
+      security:
+      - bearer: []
+      summary: Create an upgrade link for a one-time donation
+      tags:
+      - Upgrade links
+components:
+  schemas:
+    UpgradeLinkResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          description: A permanent, pre-authenticated link that the supporter can use to upgrade this one-time donation to a recurring plan. Share this link via email, SMS, or any other channel.
+      description: Contains the generated upgrade link for a one-time donation.
+      required:
+      - url
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: API key
+      type: http

@@ -1,179 +1,3429 @@
 openapi: 3.2.0
 info:
-  title: Fundraise Up REST Donations API
-  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account.
-  version: '1.0'
-  contact:
-    name: Fundraise Up
-    url: https://fundraiseup.com
-  license:
-    name: Proprietary
-    url: https://fundraiseup.com/terms/
-servers:
-- url: https://api.fundraiseup.com/v1
-  description: Fundraise Up REST API
-security:
-- bearerAuth: []
+  title: Fundraise Up Donations API
+  description: '1. Overview
+
+    2. Limitations
+
+    3. Key features
+
+    4. Use cases
+
+    5. How to get API key
+
+    6. Managing API keys
+
+    7. Authentication
+
+    8. Parent accounts and subaccounts
+
+    9. Rate limits
+
+    10. Errors
+
+    11. Pagination
+
+    12. Request IDs
+
+    13. Changes in API
+
+
+    ## Overview
+
+
+    The Fundraise Up API gives you more control over your fundraising data. Use it to process offline donations through your Fundraise Up account and keep your CRM or other systems up to date with your fundraising activity. With the API, you can interact with these resources:
+
+
+    - Donations — Create and update donations and their associated recurring plans (within 24 hours of creation, API-created only). - Recurring plans — Read recurring donation schedules. - Supporters — Access supporter details. - Events — Retrieve events from your Audit Log. - Donor Portal access links — Authenticate supporters in the Donor Portal. - Donor Portal recurring plan access links — Provide direct access to recurring plan settings. - Campaigns — List and retrieve campaign details, assign and unassign designations. - Designations — Create, update, delete, and list designations, including batch operations. - Designation groups — List and retrieve designation groups, assign and unassign designations. - Designation configurations — Access relationships between designations and campaigns. - Upgrade links — Generate upgrade links for one-time donations to convert them into recurring plans. ## Limitations
+
+
+    - Most endpoints operate on a single object per request. Designation endpoints support batch operations for up to 100 items. - Updates to Donations and Recurring plans are restricted to the first 24 hours and apply only to API-created donations. - You can retrieve and export data only for Donations, Recurring plans, Supporters, Events, Campaigns, Designations, Designation groups, and Designation configurations. - The API supports the following payment methods: credit cards, debit cards, Apple Pay, Google Pay, ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit). - For ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) donations, Fundraise Up sends the mandate confirmation email to the supporter only when `supporter.email` is provided. Without an email, notifying the supporter about the direct debit mandate is the organization''s responsibility. ## Key features
+
+
+    - Architecture — Built on REST principles. - URLs — Provides predictable, resource-oriented URLs. - Requests — Accepts JSON-encoded request bodies with `Content-Type: application/json` header. - Responses — Returns JSON-encoded responses. - Standards — Uses standard HTTP response codes, authentication, and verbs. ## Use cases
+
+
+    There are a variety of use cases where you can integrate our API into your fundraising flow. In particular, you can use our API for:
+
+
+    - Ticketing and events. - Face-to-face fundraising. - Direct mail campaigns. - Telefundraising. - Fundraising galas and dinners. - Analytics integrations. The API is not intended for migrating subscriptions from legacy systems. For migration purposes, please refer to our Migration service. ## How to get API key
+
+
+    To use the Fundraise Up API, you first need to generate an API key. Only users with the Organization Administrator role can create and manage API keys. Follow these steps to create your API key:
+
+
+    1. Go to **Dashboard** > **Settings** > **API keys**. 2. Click **Create API key**. 3. Enter a descriptive name for your API key. This name helps you identify different keys when you have multiple integrations. 4. Set permissions for your key.'
+  version: 1.0.0
+  contact: {}
+servers: []
 tags:
 - name: Donations
-  description: One-time and recurring donations, including offline and ACH donations.
+  description: 'The Donation object represents a single donation. It can be either a one-time donation or an installment as part of a recurring plan.
+
+
+    You can create donations, update donations and associated recurring plans sourced from the API, and read donations from your account.'
 paths:
-  /donations:
-    get:
-      operationId: listDonations
-      tags:
-      - Donations
-      summary: List donations
-      description: Retrieves donations with cursor-based pagination.
-      parameters:
-      - $ref: '#/components/parameters/Limit'
-      - $ref: '#/components/parameters/StartingAfter'
-      - $ref: '#/components/parameters/EndingBefore'
+  /v1/donations:
+    post:
+      description: 'This request allows you to create either a one-time donation or a recurring plan.
+
+
+        To create a recurring plan, you must include a `recurring_plan` object with the `frequency` parameter. If the object is not provided, a one-time donation will be created.
+
+
+        All fields and values must meet the requirements of your campaign. Otherwise, an error will be returned.
+
+
+        We do not format or verify addresses and emails that were sent through the API.
+
+
+        A Stripe payment method ID is required. For more details on how to create a payment method, refer to the Stripe Payment Methods documentation.
+
+
+        ### Prerequisites
+
+
+        Make sure you have:
+
+
+        - A Stripe account that is connected to your Fundraise Up account and activated.
+
+
+        - An active campaign with a money-based payment method.
+
+
+        - An API key with permission to create new donations.
+
+
+        - Access to the Stripe API for the same Stripe account used as the Fundraise Up payment method, with the ability to create Payment Methods.
+
+
+        Nonprofit organizations must meet PCI compliance requirements to ensure the secure processing of payment card data. Fundraise Up complies with these standards, but if an organization or its vendor uses direct API integration with Stripe to send raw card data (such as card numbers, expiration dates, and CVV codes), that organization or vendor is responsible for meeting broader PCI DSS requirements, such as SAQ D for merchants or higher.
+
+
+        When using Stripe Elements, organizations remain responsible for PCI compliance, but the scope is reduced, typically to SAQ A, due to Stripe handling sensitive card data processing. If a third-party vendor manages card details (for example, in face-to-face or direct mail solutions), they must maintain their own PCI compliance (SAQ D or applicable), and the organization should document them as their third-party service provider.'
+      operationId: CreateDonation
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDonationRequest'
       responses:
         '200':
-          description: A paginated list of donations.
+          description: On success, the API returns the donation object. If the parameters are invalid, the call will return an error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DonationList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '429':
-          $ref: '#/components/responses/TooManyRequests'
-    post:
-      operationId: createDonation
-      tags:
-      - Donations
+                $ref: '#/components/schemas/DonationResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access donations.
+        '422':
+          description: '`employment_status is required for political organizations` — The account has Political Organization (US) enabled, but `employment_status` was not provided.
+
+            `occupation is required when employment status is employed` — Employment status is `employed`, but `occupation` was not provided.
+
+            `employer is required when employment status is employed` — Employment status is `employed`, but `employer` was not provided.'
+      security:
+      - bearer: []
       summary: Create a donation
-      description: Creates a one-time or recurring donation, including donations collected outside the website and ACH US Direct Debit donations (which require a Stripe Payment Method ID created in Stripe beforehand).
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Donation'
-      responses:
-        '200':
-          description: The created donation.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Donation'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '429':
-          $ref: '#/components/responses/TooManyRequests'
-  /donations/{id}:
-    parameters:
-    - $ref: '#/components/parameters/Id'
+      tags:
+      - Donations
     get:
-      operationId: getDonation
-      tags:
-      - Donations
-      summary: Retrieve a donation
-      description: Retrieves the details of a specific donation by ID.
+      description: 'This request lets you access donation records in your Fundraise Up account. Note that we do not support webhooks.
+
+
+        The supporter data will be displayed as it appears on the Donation page in your Dashboard.'
+      operationId: GetDonations
+      parameters:
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+        schema:
+          example: true
+          type: boolean
+      - name: starting_after
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records older than the specified object ID.
+        schema:
+          type: string
+      - name: ending_before
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records newer than the specified object ID.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: This parameter specifies the number of records to display per page, ranging from 1 to 100
+        schema:
+          minimum: 1
+          maximum: 100
+          default: 10
+          type: integer
+      - name: created
+        required: false
+        in: query
+        schema:
+          $ref: '#/components/schemas/CreatedQuery'
+      - name: include
+        required: false
+        in: query
+        description: 'Comma-separated list of additional fields to include in the response. Supported values: upgrade_link.'
+        schema:
+          type: string
+          enum:
+          - upgrade_link
       responses:
         '200':
-          description: The requested donation.
+          description: On success, the API returns the array of donation objects. If the parameters are invalid, the call will return an error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Donation'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    post:
-      operationId: updateDonation
+                $ref: '#/components/schemas/DonationsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access donations.
+      security:
+      - bearer: []
+      summary: Get donations
       tags:
       - Donations
-      summary: Update a donation
-      description: Updates a donation. Updates are only permitted within 24 hours of the donation's creation.
+  /v1/donations/{id}:
+    post:
+      description: 'This request allows you to update the details of a donation that was made through an API call.
+
+
+        You can make updates to:
+
+
+        * Enrich data.
+
+        * Modify parameter values.
+
+        * Remove parameter values.
+
+
+        This action is only available within 24 hours of the donation being created.
+
+
+        Donations created outside of the API, such as through the Checkout modal, Campaign Page, or Virtual Terminal, cannot be edited through the API.
+
+
+        The donation ID must belong to the account associated with the API key.
+
+
+        Donations from subaccounts cannot be updated using the API key of the parent account. Attempting to do so will result in an error. To update a donation in a subaccount, you must use the API key of that subaccount.
+
+
+        For the update to be successful, the donation object must match the current campaign settings, otherwise the operation will fail with a validation error.
+
+
+        Parallel requests to update one object are not allowed and will result in an error.
+
+
+        Any parameters or child parameters that are not provided will remain unchanged.
+
+
+        A successful update will modify the donation receipt, but no emails will be sent as a result.
+
+
+        If you update recurring plan, the changes will apply to both the specific installment and all future installments.'
+      operationId: UpdateDonation
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the donation, formatted as D[A-Z]{7}.
+        schema:
+          example: DXXXXXXX
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Donation'
+              $ref: '#/components/schemas/UpdateDonationRequest'
       responses:
         '200':
-          description: The updated donation.
+          description: On success, the API returns the donation object. If the parameters are invalid, the call will return an error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Donation'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: '#/components/schemas/DonationResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to update donations.
+        '422':
+          description: '`employment_status is required for political organizations` — The account has Political Organization (US) enabled, but `employment_status` was not provided.
+
+            `occupation is required when employment status is employed` — Employment status is `employed`, but `occupation` was not provided.
+
+            `employer is required when employment status is employed` — Employment status is `employed`, but `employer` was not provided.'
+      security:
+      - bearer: []
+      summary: Update a donation and its associated recurring plan
+      tags:
+      - Donations
+    get:
+      description: 'This request lets you access donation records in your Fundraise Up account. Note that we do not support webhooks.
+
+
+        The supporter data will be displayed as it appears on the Donation page in your Dashboard.'
+      operationId: GetDonation
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the donation, formatted as D[A-Z]{7}.
+        schema:
+          example: DXXXXXXX
+          type: string
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+        schema:
+          example: true
+          type: boolean
+      - name: include
+        required: false
+        in: query
+        description: 'Comma-separated list of additional fields to include in the response. Supported values: upgrade_link.'
+        schema:
+          type: string
+          enum:
+          - upgrade_link
+      responses:
+        '200':
+          description: On success, the API returns the donation object. If the parameters are invalid, the call will return an error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access donations.
+      security:
+      - bearer: []
+      summary: Get a donation
+      tags:
+      - Donations
+  /v1/donations/fee:
+    get:
+      description: 'This endpoint calculates the processing fee for a given donation amount and currency. Fee amounts vary by organization, so always use this endpoint to get the exact values — don''t calculate the fee independently.
+
+        This endpoint requires the same API key scope as creating a donation (Donations — Write).'
+      operationId: GetDonationFee
+      parameters:
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+        schema:
+          example: true
+          type: boolean
+      - name: currency
+        required: true
+        in: query
+        description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.
+        schema:
+          example: usd
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sle
+          - sos
+          - srd
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+      - name: amount
+        required: true
+        in: query
+        description: 'Donation amount in the selected currency. Must be a decimal string in the format {NNN}[.nn]. Examples: 9.99 (for USD), 200 (for JPY).'
+        schema:
+          example: '99.99'
+          type: string
+      responses:
+        '200':
+          description: On success, the API returns the calculated fee and the total amount including the fee.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetDonationFeeResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access donations.
+      security:
+      - bearer: []
+      summary: Get donation fee
+      tags:
+      - Donations
 components:
-  parameters:
-    EndingBefore:
-      name: ending_before
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records before it.
-      schema:
-        type: string
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
-      schema:
-        type: string
-    Id:
-      name: id
-      in: path
-      required: true
-      description: The unique identifier of the resource.
-      schema:
-        type: string
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: Number of records to return, from 1 to 100.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-  responses:
-    NotFound:
-      description: The requested resource does not exist.
-    TooManyRequests:
-      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
-    Unauthorized:
-      description: The API key is missing or invalid.
   schemas:
-    Donation:
+    PayoutResponse:
       type: object
-      description: A one-time or recurring donation. Field schema to be reconciled against the hosted reference.
+      properties:
+        amount:
+          type: string
+          description: Payout amount in the donation's currency.
+          example: '99.99'
+        amount_in_default_currency:
+          type: string
+          description: Payout amount in the organization's default currency at the time of donation.
+          example: '59.99'
+        currency:
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bgn
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - hrk
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mro
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sll
+          - sle
+          - sos
+          - srd
+          - std
+          - svc
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+          - btc
+          - eth
+          - usdt
+          - usdc
+          - sol
+          - dot
+          - doge
+          - shib
+          - ltc
+          - bch
+          - xtz
+          - fil
+          - ftm
+          - gala
+          - paxg
+          - zec
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.
+          example: usd
+      description: Contains information about the payout details.
+      required:
+      - amount
+      - amount_in_default_currency
+      - currency
+    CreateDonationRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          description: 'Donation amount in the selected currency. Must be a decimal string in the format `{NNN}[.nn]`. Examples: 9.99 (for USD), 200 (for JPY).
+
+
+            The amount must be greater than $1 or its equivalent in other currencies. If a minimum amount is set for the campaign, the donation must meet or exceed that value.'
+          example: '99.99'
+        campaign:
+          type: string
+          description: Campaign ID. Must belong to the account that owns the API key, otherwise an error will occur. Must be active and accept money-based donations, otherwise an error will occur.
+          example: FUNXXXXXXXX
+        currency:
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sle
+          - sos
+          - srd
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.
+          example: usd
+        designation:
+          type: string
+          description: 'The ID of the fund, program, or initiative the donation goes to. You can use the ID of any designation created in your account, whether or not it is linked to a campaign.
+
+            Only one designation can be set for a single donation. To create multiple donations with different designations, make separate API calls.
+
+            You can find the ID in the [Designations section of the Dashboard](https://dashboard.fundraiseup.com/designations).'
+          example: EXXXXXXX
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodPostRequest'
+        supporter:
+          $ref: '#/components/schemas/SupporterPostRequest'
+        comment:
+          type:
+          - string
+          - 'null'
+          description: Optional comment, maximum 256 characters.
+        custom_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomFieldPostRequest'
+        fee_amount:
+          type: string
+          description: Optional amount of fees covered by the supporter. Must be a positive decimal string in the format `{NNN}[.nn]`. Use `GET /v1/donations/fee` to retrieve the calculated fee to pass here.
+          example: '5.00'
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+          example: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionPostRequest'
+        recurring_plan:
+          $ref: '#/components/schemas/RecurringPostRequest'
+        skip_thank_you_email:
+          type: boolean
+          description: '`false` (default) will send a donation receipt email for the first installment.
+
+
+            `true` will prevent the donation receipt email from being sent for the first installment.
+
+
+            Available for recurring plans only.
+
+
+            To use this parameter, you must also include the `email` parameter.
+
+
+            Sending this parameter for a one-time donation will return an error.'
+      description: Contains the request parameters required for creating a donation.
+      required:
+      - campaign
+      - payment_method
+      - currency
+      - amount
+      - supporter
+      - designation
+    RecurringPostRequest:
+      type: object
+      properties:
+        frequency:
+          type: string
+          description: Recurring plan frequency. Determines how often a recurring donation is processed.
+          enum:
+          - daily
+          - weekly
+          - biweekly
+          - every4weeks
+          - monthly
+          - bimonthly
+          - quarterly
+          - semiannual
+          - annual
+          example: monthly
+      description: 'Defines the parameters for a recurring donation plan.
+
+
+        This must be specified if the campaign settings in the Frequency section do not include "Once" as an option for either Default Frequency or Second Frequency.'
+      required:
+      - frequency
+    IpResponse:
+      type: object
+      properties:
+        address:
+          type:
+          - string
+          - 'null'
+          description: IP address.
+          example: 111.111.111.111
+        city:
+          type:
+          - string
+          - 'null'
+          description: City name.
+          example: Nashville
+        country_name:
+          type:
+          - string
+          - 'null'
+          description: Full country name.
+          example: United States
+        region:
+          type:
+          - string
+          - 'null'
+          description: Region name.
+          example: Tennessee
+      description: Contains details about the IP address from which the donation was made.
+      required:
+      - address
+      - country_name
+      - region
+      - city
+    BenefitShownNotSelectedResponse:
+      type: object
+      properties:
+        state:
+          type: string
+          enum:
+          - shown_not_selected
+          description: The benefit was shown to the supporter, who did not select it.
+      description: Benefit was displayed to the supporter but not selected.
+      required:
+      - state
+    UtmResponse:
+      type: object
+      properties:
+        campaign:
+          type:
+          - string
+          - 'null'
+          description: The `utm_campaign` value, if available. Shows the name of the marketing campaign.
+          example: giving_tuesday
+        content:
+          type:
+          - string
+          - 'null'
+          description: The `utm_content` value, if available. Identifies which link or ad variation was clicked.
+          example: textlink
+        medium:
+          type:
+          - string
+          - 'null'
+          description: The `utm_medium` value, if available. Shows the type of marketing channel.
+          example: email
+        source:
+          type:
+          - string
+          - 'null'
+          description: The `utm_source` value, if available. Shows where the traffic came from.
+          example: google
+        term:
+          type:
+          - string
+          - 'null'
+          description: The `utm_term` value, if available. Shows the keywords used in a search.
+          example: how_to_support_penguins
+      description: Represents UTM tags associated with the donation.
+      required:
+      - source
+      - campaign
+      - content
+      - medium
+      - term
+    ElementResponse:
+      type: object
       properties:
         id:
           type: string
-        object:
+          description: Unique element identifier.
+          example: XXXXXXXX
+        name:
           type: string
-          example: donation
-      additionalProperties: true
-    Pagination:
+          description: Name of the element.
+          example: My Element
+        type:
+          type: string
+          description: Type of element used for the donation.
+          example: donationForm
+          enum:
+          - reminder
+          - donateButton
+          - stickyButton
+          - imageCard
+          - textLink
+          - donationForm
+          - simpleForm
+          - goalMeter
+          - statCounter
+          - impactSlider
+          - donationLevels
+          - buttonGroup
+          - floatingButton
+          - messageBar
+          - topSupporters
+          - topLocations
+          - socialProof
+          - qrCode
+          - recentDonations
+          - p2pButton
+          - p2pLink
+          - p2pFundraisingButton
+          - p2pFundraisingLink
+          - topFundraisers
+          - donorMap
+          - lightbox
+          - zakatAlMalCalculator
+          - zakatAlFitrCalculator
+          - fidiyahKaffarahCalculator
+          - p2pFundraiserGallery
+          - p2pTopFundraisers
+          - fundraisingPageLink
+          - fundraisingPageInviteLink
+          - link
+          - direct
+          - debugPanel
+          - testModePanel
+          - aiAssistant
+          - splitTesting
+          - jsApi
+      description: Represents the element through which the donation was made.
+      required:
+      - id
+      - type
+      - name
+    TributeRecipientResponse:
       type: object
       properties:
+        address:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/RecipientAddressResponse'
+        email:
+          type:
+          - string
+          - 'null'
+          description: Email address used for `email` sharing type.
+          example: example@example.com
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Tribute recipient's first name.
+          example: Sidney
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Tribute recipient's last name.
+          example: Jones
+        title:
+          type:
+          - string
+          - 'null'
+          description: Tribute recipient's title.
+          example: mr
+      description: Contains details about the tribute recipient.
+      required:
+      - title
+      - first_name
+      - last_name
+      - email
+      - address
+    CampaignResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Campaign code, as set in the Dashboard.
+          example: Code-1
+        id:
+          type: string
+          description: Unique campaign identifier.
+          example: FUNXXXXXXXX
+        name:
+          type: string
+          description: Campaign name.
+          example: My Campaign
+      description: Provides details about the campaign.
+      required:
+      - id
+      - code
+      - name
+    GetDonationFeeResponse:
+      type: object
+      properties:
+        amount:
+          type: string
+          example: '99.99'
+          description: Donation amount in the selected currency.
+        amount_with_fee:
+          type: string
+          example: '103.19'
+          description: Total amount including the fee in the selected currency.
+        fee_amount:
+          type: string
+          example: '3.20'
+          description: Processing fee amount in the selected currency.  Pass this value as fee_amount in POST /v1/donations together with amount to record the fee as supporter-covered.
+      required:
+      - amount
+      - fee_amount
+      - amount_with_fee
+    CreatedQuery:
+      type: object
+      properties:
+        created[gt]:
+          type: string
+          format: date-time
+          description: Minimum creation date (exclusive). Returns records after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[gte]:
+          type: string
+          format: date-time
+          description: Minimum creation date (inclusive). Returns records from and after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lt]:
+          type: string
+          format: date-time
+          description: Maximum creation date (exclusive). Returns records before this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lte]:
+          type: string
+          format: date-time
+          description: Maximum creation date (inclusive). Returns records up to and including this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+      description: Filters results by the record creation date. Accepts a single date or a date range in RFC 3339 format.
+    CustomFieldResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the custom field.
+          example: Field1
+        value:
+          type: string
+          description: Value of the custom field.
+          example: Value1
+      description: 'Represents custom fields populated according to the campaign settings.
+
+
+        Missing fields will be populated with default non-blank values from the campaign settings.'
+      required:
+      - name
+      - value
+    PaymentMethodStripePostRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The [PaymentMethod ID](https://docs.stripe.com/api/payment_methods/object#payment_method_object-id) within the organization's Stripe account. Supported payment methods are credit cards, debit cards, Apple Pay, and Google Pay.
+          example: pm_card_visa
+        setup_intent_id:
+          type: string
+          description: The Stripe SetupIntent ID associated with the payment method. Required for ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) payments. Not applicable for card-based payment methods.
+          example: seti_1OsI2pHUtU5Pnu8bXXXXXXXX
+      description: 'Contains information about the Stripe payment method used for the transaction.
+
+
+        When writing test code, use a `payment_method.stripe.id` such as `pm_card_visa` from the list of [Stripe test cards](https://docs.stripe.com/testing?testing-method=payment-methods#cards). For more information on using test cards, see the [Stripe documentation](https://docs.stripe.com/testing?testing-method=payment-methods#use-test-cards).'
+      required:
+      - id
+    BankAccountResponse:
+      type: object
+      properties:
+        last4:
+          type:
+          - string
+          - 'null'
+          description: Last four digits of the bank account number.
+          example: '1234'
+      description: Contains information about the bank account used for the payment.
+      required:
+      - last4
+    AddressResponse:
+      type: object
+      properties:
+        city:
+          type:
+          - string
+          - 'null'
+          description: City name
+          example: Nashville
+        country:
+          type: string
+          description: '[Two-letter country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2), in lowercase.'
+          example: us
+        line1:
+          type:
+          - string
+          - 'null'
+          description: First address line.
+          example: 123 Example St.
+        line2:
+          type:
+          - string
+          - 'null'
+          description: Second address line.
+          example: Apt. 1
+        postal_code:
+          type:
+          - string
+          - 'null'
+          description: Postal or ZIP code.
+          example: '111111'
+        region:
+          type:
+          - string
+          - 'null'
+          description: Can refer to a region, state, or province.
+          example: Tennessee
+      description: Contains the mailing address details.
+      required:
+      - country
+      - city
+      - postal_code
+      - region
+      - line1
+      - line2
+    ChargePaymentResponse:
+      type: object
+      properties:
+        bank_account:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/BankAccountResponse'
+        credit_card:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/CreditCardResponse'
+        daf_external_id:
+          type:
+          - string
+          - 'null'
+          description: The external grant ID assigned by Chariot to the Donor-Advised Fund (DAF) grant. Returns `null` unless `payment.method` is `daf`.
+          example: 010c5aa7-28f5-426f-b31f-9ba77754055f
+        daf_sponsor_fund:
+          type:
+          - string
+          - 'null'
+          description: The name of the Donor-Advised Fund (DAF) sponsor organization. Returns `null` unless `payment.method` is `daf`.
+          example: Fidelity Charitable
+        daf_tracking_id:
+          type:
+          - string
+          - 'null'
+          description: The Chariot tracking ID of the Donor-Advised Fund (DAF) grant. Returns `null` unless `payment.method` is `daf`.
+          example: 1e60800e-849b-43d1-870e-57afc8d75473
+        email:
+          type:
+          - string
+          - 'null'
+          description: Email associated with the payment method.
+          example: example@example.com
+        error_message:
+          type:
+          - string
+          - 'null'
+          description: Most recent payment error message. Returned only if the status is `failed` or `retrying`. Otherwise, returns `null`.
+          example: Something went wrong
+        id:
+          type:
+          - string
+          - 'null'
+          description: 'For PayPal: Capture ID.
+
+
+            For Stripe: Charge ID or Payment Intent ID.
+
+
+            For other processors: payment ID.'
+          example: ch_1I9nHHHUtU5Pnu8b93DuxyzE
+        method:
+          type: string
+          enum:
+          - credit_card
+          - apple_pay
+          - google_pay
+          - click_to_pay
+          - ach
+          - paypal
+          - venmo
+          - becs_direct_debit
+          - bacs_direct_debit
+          - pad
+          - sepa_direct_debit
+          - ideal
+          - crypto
+          - stock
+          - link
+          - twint
+          - mobile_pay
+          - wero
+          - revolut_pay
+          - cash_app_pay
+          - eps
+          - daf
+          description: 'Payment method, in lowercase underscore. `stock` is deprecated but may still appear in retrieved data.
+
+
+            The value of `us_bank_account` maps to `ach`. The value of `plaid` also maps to `ach`.'
+          example: paypal
+        processor:
+          type: string
+          enum:
+          - stripe
+          - paypal
+          - gemini
+          - manual_brokerage
+          - coinbase_commerce
+          - chariot
+          description: Payment processor, in lowercase. `coinbase_commerce` is deprecated but may still appear in retrieved data.
+          example: stripe
+      description: Provides details about the payment processing.
+      required:
+      - id
+      - email
+      - error_message
+      - method
+      - processor
+      - credit_card
+      - bank_account
+      - daf_tracking_id
+      - daf_external_id
+      - daf_sponsor_fund
+    CommunicationConsentResponse:
+      type: object
+      properties:
+        customized:
+          $ref: '#/components/schemas/CustomizedCommunicationConsentResponse'
+        general:
+          type: string
+          description: 'Indicates overall communication consent.
+
+
+            `opted_in` if the supporter agreed to receive communications.
+
+
+            `opted_out` if the supporter declined communications.
+
+
+            `not_submitted` if no consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_in
+      description: Stores the supporter's [communication consent type](https://fundraiseup.com/docs/marketing-consent/) associated with a donation.
+    CustomFieldPutRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the custom field.
+          example: Field1
+        value:
+          type: string
+          description: Value of the custom field.
+          example: Value1
+      description: 'Represents custom fields populated according to the campaign settings.
+
+
+        Missing fields will be populated with default non-blank values from the campaign settings.'
+      required:
+      - name
+      - value
+    SupporterAddressPostRequest:
+      type: object
+      properties:
+        city:
+          type: string
+          description: Supporter's city. Maximum 64 characters.
+          example: Nashville
+        line1:
+          type:
+          - string
+          - 'null'
+          description: The first line of the supporter's mailing address, typically including the street address. Maximum 256 characters.
+          example: 123 Main St
+        postal_code:
+          type: string
+          description: Supporter's postal code. Maximum 10 characters.
+          example: '111111'
+        country:
+          type: string
+          description: '[Two-letter country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2), lowercase.'
+          example: us
+        line2:
+          type:
+          - string
+          - 'null'
+          description: The second line of the supporter's mailing address, typically including the street address. Maximum 256 characters.
+          example: Apt 1
+        region:
+          type:
+          - string
+          - 'null'
+          description: 'Region, state, or province exactly as provided in the API request. Values are not normalized or validated.
+
+
+            For donations created through checkout, location data uses ISO-3166 formats. If you want API-created donations to match checkout formatting, send regions using the same standard — for example, US states as two-letter codes (CA, NY).'
+          example: TN
+      description: 'Represents the mailing address of the supporter.
+
+
+        This field is required if the campaign requires a mailing address, based on the "Ask for mailing address" setting and the minimum amount that triggers the request.'
+      required:
+      - city
+      - line1
+      - postal_code
+    TributeSharingResponse:
+      type: object
+      properties:
+        from:
+          type:
+          - string
+          - 'null'
+          description: Name of the sender.
+          example: Alex Garcia
+        hide_amount:
+          type: boolean
+          description: Indicates whether the donation amount should be hidden in the tribute notification sent to the recipient.
+          example: false
+        message:
+          type:
+          - string
+          - 'null'
+          description: Custom message included in the tribute.
+          example: In loving memory of Jordan
+        recipient:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/TributeRecipientResponse'
+        type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - email
+          - address
+          description: Sharing method.
+          example: email
+      description: Defines the sharing options for a tribute.
+      required:
+      - type
+      - from
+      - message
+      - recipient
+      - hide_amount
+    QuestionPutRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the question, formatted as Q[A-Z]{7}. Located in [Settings > Questions.](https://dashboard.fundraiseup.com/settings/questions).
+          example: QXXXXXXX
+        checked:
+          type: boolean
+          description: Indicates whether the checkbox is selected. Required for question types “Checkbox”.
+          example: true
+        date:
+          type: string
+          description: Answer for the question in date format (YYYY-MM-DD). Required for questions with the type “Date”.
+          example: '1990-05-15'
+        options:
+          description: List of selected options. Required for question types “Select multiple options” or “Checkbox”.
+          example:
+          - Option 1
+          - Option 2
+          type: array
+          items:
+            type: string
+        text:
+          type: string
+          description: Answer for the question, maximum 256 characters. Required for questions with types “Text box”, “Text line”, “Select one option”, and “Dropdown menu”.
+          example: Example answer
+      description: 'Represents an update to an answer in the donation process. Required if the campaign settings include mandatory questions.
+
+
+        Submitting a new request erases all previous answers to all questions and sets the answers to the new values.'
+      required:
+      - id
+    PlatformFeeResponse:
+      type: object
+      properties:
+        amount:
+          type: string
+          description: Platform fee amount in the donation's currency.
+          example: '99.99'
+        amount_in_default_currency:
+          type: string
+          description: Platform fee amount converted to the organization's default currency at the time of the donation.
+          example: '59.99'
+        currency:
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bgn
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - hrk
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mro
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sll
+          - sle
+          - sos
+          - srd
+          - std
+          - svc
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+          - btc
+          - eth
+          - usdt
+          - usdc
+          - sol
+          - dot
+          - doge
+          - shib
+          - ltc
+          - bch
+          - xtz
+          - fil
+          - ftm
+          - gala
+          - paxg
+          - zec
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.
+          example: usd
+      description: 'Provides details about the platform fee charged by Fundraise Up.
+
+
+        The `platform_fee` field will return 0 until Stripe provides the finalized fee data, which may take some time after a successful donation. To retrieve the finalized fee values, use the `Events` endpoint. Look for the `donation.success` event, which confirms that the calculated fees have been updated by Stripe.'
+      required:
+      - amount
+      - amount_in_default_currency
+      - currency
+    AccountResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Custom identifier for the organization, set as the Account code in the Fundraise Up account.
+          example: Code-1
+        id:
+          type: string
+          description: Unique identifier of the organization in the format A[A-Z]{7}.
+          example: AXXXXXXX
+        name:
+          type: string
+          description: The name of the organization as set in the Fundraise Up account.
+          example: Example Account
+      description: Organization account information.
+      required:
+      - id
+      - code
+      - name
+    UpdateDonationRequest:
+      type: object
+      properties:
+        campaign:
+          type: string
+          description: Campaign ID. Must belong to the account that owns the API key, otherwise an error will occur. Must be active and accept money-based donations, otherwise an error will occur.
+          example: FUNXXXXXXXX
+        comment:
+          type:
+          - string
+          - 'null'
+          description: Updated comment, maximum 256 characters.
+        custom_fields:
+          description: Array of custom fields
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomFieldPutRequest'
+        designation:
+          type: string
+          description: 'The ID of the fund, program, or initiative the donation goes to. You can use the ID of any designation created in your account, whether or not it is linked to a campaign.
+
+            Only one designation can be set for a single donation. To create multiple donations with different designations, make separate API calls.
+
+            You can find the ID in the [Designations section of the Dashboard](https://dashboard.fundraiseup.com/designations).'
+          example: EXXXXXXX
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+          example: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionPutRequest'
+        supporter:
+          $ref: '#/components/schemas/SupporterRequest'
+      description: Contains the request parameters for updating a donation.
+    SupporterRequest:
+      type: object
+      properties:
+        address:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/SupporterAddressPutRequest'
+        email:
+          type:
+          - string
+          - 'null'
+          description: Supporter's email address. Maximum 254 characters.
+          example: example@example.com
+        employer:
+          description: The supporter's employer. Required when `employment_status` is `employed` for US political organizations.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/SupporterEmployerPostRequest'
+        employment_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - employed
+          - unemployed
+          - retired
+          description: 'The supporter''s employment status. Required for US political organizations. Possible values: `employed`, `unemployed`, `retired`.'
+          example: employed
+        first_name:
+          type: string
+          description: Supporter's first name. Maximum 256 characters.
+          example: Alex
+        last_name:
+          type: string
+          description: Supporter's last name. Maximum 256 characters.
+          example: Garcia
+        occupation:
+          type:
+          - string
+          - 'null'
+          description: The supporter's occupation. Required when `employment_status` is `employed`. Max 200 characters.
+          example: Software Engineer
+        phone:
+          type:
+          - string
+          - 'null'
+          description: 'Supporter''s phone number. Maximum 20 characters.
+
+
+            Only included if the campaign setting “Ask for phone number” is enabled.
+
+
+            Required if the campaign is configured to require the supporter to provide their phone number.'
+          example: +1 (111) 111111
+        title:
+          type:
+          - string
+          - 'null'
+          description: 'Supporter''s title. Accepted only if the campaign collects titles, and required if the campaign requires it. Available values depend on the organization''s country: Germany and Austria: any value up to 100 characters. United Kingdom: `mr`, `mrs`, `miss`, `ms`, `mx`, `sir`, `dr`, `rev`, `dcn`, `fr`, `br`, `sr`, `prof`. France: `m`, `mme`, `mlle`, `autre`. Canada (French): `m`, `mme`, `mlle`, `autre`.'
+          example: mr
+      description: Represents the personal data of the supporter. Only the specified parameters are updated, the others remain unchanged.
+    CustomFieldPostRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the custom field.
+          example: Field1
+        value:
+          type: string
+          description: Value of the custom field.
+          example: Value1
+      description: 'Represents custom fields populated according to the campaign settings.
+
+
+        Missing fields will be populated with default non-blank values from the campaign settings.'
+      required:
+      - name
+      - value
+    ProcessingFeeResponse:
+      type: object
+      properties:
+        amount:
+          type: string
+          description: Processing fee amount in the donation's currency.
+          example: '99.99'
+        amount_in_default_currency:
+          type: string
+          description: Platform fee amount converted to the organization’s default currency at the time of the donation.
+          example: '59.99'
+        currency:
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bgn
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - hrk
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mro
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sll
+          - sle
+          - sos
+          - srd
+          - std
+          - svc
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+          - btc
+          - eth
+          - usdt
+          - usdc
+          - sol
+          - dot
+          - doge
+          - shib
+          - ltc
+          - bch
+          - xtz
+          - fil
+          - ftm
+          - gala
+          - paxg
+          - zec
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.
+          example: usd
+      description: 'Contains information about the processing fee charged by the payment processor.
+
+
+        The `processing_fee` field will return 0 until Stripe provides the finalized fee data, which may take some time after a successful donation. To retrieve the finalized fee values, use the `Events` endpoint. Look for the `donation.success` event, which confirms that the calculated fees have been updated by Stripe.'
+      required:
+      - amount
+      - amount_in_default_currency
+      - currency
+    QuestionResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Question code, as set in the Dashboard.
+          example: Code-1
+        id:
+          type: string
+          description: Unique identifier of the question, formatted as Q[A-Z]{7}. Located in [Settings > Questions](https://dashboard.fundraiseup.com/settings/questions).
+          example: QXXXXXXX
+        checked:
+          type: boolean
+          description: Indicates whether the checkbox is selected. Required for questions with the type "Single checkbox".
+          example: true
+        options:
+          type: array
+          items:
+            type: string
+          description: List of selected options. Required for questions with the type "Multiple checkboxes".
+          example:
+          - OK
+          - Good
+        text:
+          type: string
+          description: Answer for the question. This field is returned only for question types "Text box", "Text line", "Select one option", and "Dropdown menu".
+          example: Example answer
+      description: 'Provides information about a question used in the donation process.
+
+
+        Each item must include an `id` and, depending on the question type, one of the following fields: `text`, `options`, or `checked`.'
+      required:
+      - id
+      - code
+    SupporterAddressPutRequest:
+      type: object
+      properties:
+        city:
+          type: string
+          description: Supporter's city. Maximum 64 characters.
+          example: Nashville
+        country:
+          type: string
+          description: '[Two-letter country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2), lowercase.'
+          example: us
+        line1:
+          type: string
+          description: The first line of the supporter's mailing address, typically including the street address. Maximum 256 characters.
+          example: 123 Main St
+        line2:
+          type:
+          - string
+          - 'null'
+          description: The second line of the supporter's mailing address, typically including the street address. Maximum 256 characters.
+          example: Apt 1
+        postal_code:
+          type: string
+          description: Supporter's postal code. Maximum 10 characters.
+          example: '111111'
+        region:
+          type:
+          - string
+          - 'null'
+          description: 'Supporter''s region. Maximum 64 characters.
+
+
+            Required for all countries except `gb` (United Kingdom), `il` (Israel), `nl` (Netherlands), `fr` (France), `de` (Germany). Can be: region, state, or province.'
+          example: Tennessee
+      description: 'Represents the mailing address of the supporter.
+
+
+        This field is required if the campaign requires a mailing address, based on the “Ask for mailing address” setting and the minimum amount that triggers the request.
+
+
+        To remove the address, pass `null` for `supporter.address`.'
+    DonationsResponse:
+      type: object
+      properties:
+        data:
+          description: An array containing the entity records, paginated by any request parameters.
+          type: array
+          items:
+            $ref: '#/components/schemas/DonationResponse'
         has_more:
           type: boolean
-          description: Whether more records are available beyond this page.
-    DonationList:
-      allOf:
-      - $ref: '#/components/schemas/Pagination'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Donation'
+          description: Indicates whether there are more records available. For `starting_after`, it shows that there is a page with older records. For `ending_before`, it indicates that there is a page with newer records.
+          example: true
+      description: Provides a paginated response for donations.
+      required:
+      - data
+      - has_more
+    EmployerResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Employer's name.
+          example: Fundraise Up Inc.
+      description: Represents the employer information.
+      required:
+      - name
+    CustomizedCommunicationConsentResponse:
+      type: object
+      properties:
+        email:
+          type: string
+          description: 'Indicates email communication consent.
+
+
+            `opted_in` if the supporter agreed to receive emails.
+
+
+            `opted_out` if the supporter declined email communication.
+
+
+            `not_submitted` if no email consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_in
+        phone_calls:
+          type: string
+          description: 'Indicates phone call communication consent.
+
+
+            `opted_in` if the supporter agreed to receive phone calls.
+
+
+            `opted_out` if the supporter declined to receive phone calls.
+
+
+            `not_submitted` if no phone call consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_out
+        postal_mail:
+          type: string
+          description: 'Indicates postal mail communication consent.
+
+
+            `opted_in` if the supporter agreed to receive postal mail.
+
+
+            `opted_out` if the supporter declined to receive postal mail.
+
+
+            `not_submitted` if no postal mail consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_in
+        sms:
+          type: string
+          description: 'Indicates SMS communication consent.
+
+
+            `opted_in` if the supporter agreed to receive SMS messages.
+
+
+            `opted_out` if the supporter declined SMS communication.
+
+
+            `not_submitted` if no SMS consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_in
+        social_media:
+          type: string
+          description: 'Indicates social media communication consent.
+
+
+            `opted_in` if the supporter agreed to receive messages through social media.
+
+
+            `opted_out` if the supporter declined social media communication.
+
+
+            `not_submitted` if no social media consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_out
+      description: Specifies consent values for individual communication channels.
+      required:
+      - email
+      - phone_calls
+      - sms
+      - postal_mail
+      - social_media
+    GiftAidResponse:
+      type: object
+      properties:
+        claimed:
+          type:
+          - boolean
+          - 'null'
+          description: Indicates whether the Gift Aid was claimed (`true`) or not (`false`).
+          example: true
+        legal_text:
+          type: string
+          description: Legal text associated with Gift Aid.
+          example: I am a UK taxpayer and want to claim Gift Aid.
+      description: Provides details about Gift Aid, available only for organizations based in Great Britain.
+      required:
+      - claimed
+      - legal_text
+    DeviceResponse:
+      type: object
+      properties:
+        browser:
+          type:
+          - string
+          - 'null'
+          description: Browser name. Can be `null` if not detected.
+          example: Chrome
+        ip:
+          $ref: '#/components/schemas/IpResponse'
+        os:
+          type:
+          - string
+          - 'null'
+          description: Operating system name. Can be `null` if not detected.
+          example: MacOS
+        type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - desktop
+          - mobile
+          - tablet
+          description: Device type. Can be `null` if not detected.
+          example: desktop
+        user_agent:
+          type:
+          - string
+          - 'null'
+          description: Raw user agent string. Can be `null` if not provided.
+          example: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
+      description: Provides information about the device being used.
+      required:
+      - browser
+      - os
+      - type
+      - user_agent
+      - ip
+    SupporterPostRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          description: Supporter's first name. Maximum 256 characters.
+          example: Alex
+        last_name:
+          type: string
+          description: Supporter's last name. Maximum 256 characters.
+          example: Garcia
+        address:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/SupporterAddressPostRequest'
+        email:
+          type:
+          - string
+          - 'null'
+          description: Supporter's email address. Maximum 254 characters.
+          example: example@example.com
+        employer:
+          description: The supporter's employer. Required when `employment_status` is `employed` for US political organizations.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/SupporterEmployerPostRequest'
+        employment_status:
+          type:
+          - string
+          - 'null'
+          enum:
+          - employed
+          - unemployed
+          - retired
+          description: 'The supporter''s employment status. Required for US political organizations. Possible values: `employed`, `unemployed`, `retired`.'
+          example: employed
+        occupation:
+          type:
+          - string
+          - 'null'
+          description: The supporter's occupation. Required when `employment_status` is `employed`. Max 200 characters.
+          example: Software Engineer
+        phone:
+          type:
+          - string
+          - 'null'
+          description: 'Supporter''s phone number. Maximum 20 characters.
+
+
+            Accepts phone numbers in E.164 format or with spaces, parentheses, and hyphens.
+
+
+            Formatting is preserved as entered.
+
+
+            Only included if the campaign setting "Ask for phone number" is enabled.
+
+
+            Required if the campaign is configured to require the supporter to provide their phone number.'
+          example: +1 (111) 111-1111
+        title:
+          type:
+          - string
+          - 'null'
+          description: 'Supporter''s title. Accepted only if the campaign collects titles, and required if the campaign requires it. Available values depend on the organization''s country: Germany and Austria: any value up to 100 characters. United Kingdom: `mr`, `mrs`, `miss`, `ms`, `mx`, `sir`, `dr`, `rev`, `dcn`, `fr`, `br`, `sr`, `prof`. France: `m`, `mme`, `mlle`, `autre`. Canada (French): `m`, `mme`, `mlle`, `autre`.'
+          example: mr
+      description: Represents the personal data of the supporter.
+      required:
+      - first_name
+      - last_name
+    RecipientAddressResponse:
+      type: object
+      properties:
+        city:
+          type:
+          - string
+          - 'null'
+          description: City name
+          example: Nashville
+        country:
+          type: string
+          description: '[Two-letter country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2), in lowercase.'
+          example: us
+        line1:
+          type:
+          - string
+          - 'null'
+          description: First address line.
+          example: 123 Example St.
+        line2:
+          type:
+          - string
+          - 'null'
+          description: Second address line.
+          example: Apt. 1
+        postal_code:
+          type:
+          - string
+          - 'null'
+          description: Postal or ZIP code.
+          example: '111111'
+        region:
+          type:
+          - string
+          - 'null'
+          description: Can refer to a region, state, or province.
+          example: Tennessee
+      description: Provides the postal address for the tribute recipient.
+      required:
+      - country
+      - city
+      - postal_code
+      - region
+      - line1
+      - line2
+    BenefitShipping:
+      type: object
+      properties:
+        address:
+          description: Contains the mailing address details.
+          allOf:
+          - $ref: '#/components/schemas/AddressResponse'
+        recipient_first_name:
+          type: string
+          description: Recipient first name.
+          example: Alex
+        recipient_last_name:
+          type: string
+          description: Recipient last name.
+          example: Garcia
+      description: Shipping data of the benefit.
+      required:
+      - recipient_first_name
+      - recipient_last_name
+      - address
+    BenefitNotShownResponse:
+      type: object
+      properties:
+        state:
+          type: string
+          enum:
+          - not_shown
+          description: The benefit was not shown to the supporter.
+      description: Benefit was not displayed to the supporter.
+      required:
+      - state
+    QuestionPostRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the question, formatted as Q[A-Z]{7}. Located in [Settings > Questions](https://dashboard.fundraiseup.com/settings/questions).
+          example: QXXXXXXX
+        checked:
+          type: boolean
+          description: Indicates whether the checkbox is checked. Required for questions with the type “Single checkbox.”.
+          example: true
+        date:
+          type: string
+          description: Answer for the question in date format (YYYY-MM-DD). Required for questions with the type “Date”.
+          example: '1990-05-15'
+        options:
+          description: List of selected options. Required for question types “Multiple checkboxes”.
+          example:
+          - Option 1
+          - Option 2
+          type: array
+          items:
+            type: string
+        text:
+          type: string
+          description: Answer for the question, maximum 256 characters. Required for questions with types “Text box”, “Text line”, “Select one option”, and “Dropdown menu”.
+          example: Example answer
+      description: Represents an answer to a question in the donation process. Required if the campaign settings include mandatory questions.
+      required:
+      - id
+    FundraiserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the fundraiser.
+          example: NXXXXXXX
+        name:
+          type: string
+          description: The title of the Fundraiser, used as its main heading.
+          example: Run for hope
+      description: Contains information about the fundraiser.
+      required:
+      - id
+      - name
+    EmbeddedSupporterResponse:
+      type: object
+      properties:
+        address:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/AddressResponse'
+        email:
+          type:
+          - string
+          - 'null'
+          description: Supporter's email address.
+          example: example@example.com
+        employer:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/EmployerResponse'
+        employment_status:
+          type:
+          - string
+          - 'null'
+          description: 'The supporter''s employment status at the time of the donation. Possible values: `employed`, `unemployed`, `retired`. Returns `null` if not collected. Only collected for US political organizations.'
+          enum:
+          - employed
+          - unemployed
+          - retired
+          example: employed
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Supporter's first name.
+          example: Alex
+        id:
+          type: string
+          description: Unique supporter identifier.
+          example: SXXXXXXXX
+        language:
+          type: string
+          enum:
+          - en-US
+          - en-GB
+          - en-CA
+          - fr-CA
+          - fr-FR
+          - es
+          - nl
+          - 'no'
+          - de
+          - de-x-informal
+          - fi-FI
+          - ar-001
+          - sv
+          - it
+          - pt-PT
+          - pt-BR
+          - zh-CN
+          - zh-TW
+          - ja
+          - ko
+          - hu
+          - da
+          - ru-RU
+          - es-US
+          - pl-PL
+          - he
+          description: Supporter's locale.
+          example: en-CA
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Supporter's last name.
+          example: Garcia
+        occupation:
+          type:
+          - string
+          - 'null'
+          description: The supporter's occupation at the time of the donation. Returns `null` if not collected or if employment status is `unemployed` or `retired`. Max 200 characters.
+          example: Software Engineer
+        phone:
+          type:
+          - string
+          - 'null'
+          description: Supporter's phone number.
+          example: +1 (111) 111111
+        title:
+          type:
+          - string
+          - 'null'
+          description: Supporter's title. For organizations in Germany and Austria, any value up to 100 characters. Returns `null` if empty.
+          example: mr
+      description: Represents the supporter data as displayed on the Donation page in your Dashboard.
+      required:
+      - id
+      - email
+      - first_name
+      - last_name
+      - title
+      - phone
+      - employer
+      - employment_status
+      - occupation
+      - address
+      - language
+    TributeResponse:
+      type: object
+      properties:
+        honoree:
+          type: string
+          description: Name of the person honored or remembered.
+          example: Zhang Wei
+        id:
+          type: string
+          description: Unique tribute identifier.
+          example: TXXXXXXX
+        sharing:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/TributeSharingResponse'
+        type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - in_honor
+          - in_memory
+          description: Tribute type.
+          example: in_honor
+      description: Provides information about the tribute.
+      required:
+      - id
+      - type
+      - honoree
+      - sharing
+    SupporterEmployerPostRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the organization or company where the supporter works. Maximum 64 characters.
+          example: Fundraise Up Inc.
+      description: Contains information about the supporter's employer.
+      required:
+      - name
+    BenefitSelectedResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Benefit code, as set in the Dashboard.
+          example: TSHIRT-001
+        fair_market_value:
+          type: string
+          description: Fair market value (FMV) at the time of payment. If an option was selected, this is the value of that option. Displayed in the organization’s default currency.
+          example: '25.99'
+        fair_market_value_currency:
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bgn
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - hrk
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mro
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sll
+          - sle
+          - sos
+          - srd
+          - std
+          - svc
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+          - btc
+          - eth
+          - usdt
+          - usdc
+          - sol
+          - dot
+          - doge
+          - shib
+          - ltc
+          - bch
+          - xtz
+          - fil
+          - ftm
+          - gala
+          - paxg
+          - zec
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html) of the fair market value (FMV) currency, in lowercase.
+          example: usd
+        id:
+          type: string
+          description: Unique identifier for the benefit.
+          example: GXXXXXXX
+        name:
+          type: string
+          description: Benefit name, as set in the Dashboard.
+          example: T-shirt
+        option:
+          description: Selected benefit option.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/BenefitOption'
+        shipping:
+          description: Shipping details for the benefit.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/BenefitShipping'
+        state:
+          type: string
+          enum:
+          - selected
+          description: The supporter selected the benefit.
+      description: Benefit was selected by the supporter.
+      required:
+      - id
+      - state
+      - code
+      - name
+      - fair_market_value
+      - fair_market_value_currency
+      - option
+      - shipping
+    DesignationResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Designation code.
+          example: Code-1
+        id:
+          type: string
+          description: Unique designation identifier.
+          example: EXXXXXXX
+        name:
+          type:
+          - string
+          - 'null'
+          description: Designation name.
+          example: My Designation
+      description: Contains information about the designation.
+      required:
+      - id
+      - code
+      - name
+    PaymentMethodPostRequest:
+      type: object
+      properties:
+        stripe:
+          $ref: '#/components/schemas/PaymentMethodStripePostRequest'
+      description: Provides details about the payment method used.
+      required:
+      - stripe
+    CreditCardResponse:
+      type: object
+      properties:
+        exp_month:
+          type:
+          - string
+          - 'null'
+          description: Two-digit expiration month (`01` to `12`).
+          example: '12'
+        exp_year:
+          type:
+          - string
+          - 'null'
+          description: Four-digit expiration year.
+          example: '2023'
+        last4:
+          type:
+          - string
+          - 'null'
+          description: Last four digits of the credit card number.
+          example: '1234'
+        type:
+          type:
+          - string
+          - 'null'
+          description: 'Credit card type. Possible values: `Visa`, `MasterCard`, `American Express`, `Diners Club`, `Discover`, `JCB`, `UnionPay`, `Cartes Bancaires`, `Unknown`.'
+          example: Visa
+      description: Contains information about the credit card used for the payment.
+      required:
+      - last4
+      - exp_month
+      - exp_year
+      - type
+    BenefitOption:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Code of the selected option.
+          example: SIZE-M
+        name:
+          type: string
+          description: Name of the selected option.
+          example: Size
+        value:
+          type: string
+          description: Value of the selected option.
+          example: M
+      description: Benefit option selected by the supporter.
+      required:
+      - name
+      - value
+      - code
+    DonationRecurringPlanResponse:
+      type: object
+      properties:
+        created_at:
+          type: string
+          description: Timestamp in ISO 8601 format, indicating when the recurring plan was created in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        ended_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp in ISO 8601 format, indicating when the recurring plan ended in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        frequency:
+          type: string
+          enum:
+          - daily
+          - weekly
+          - biweekly
+          - every4weeks
+          - monthly
+          - bimonthly
+          - quarterly
+          - semiannual
+          - annual
+          description: Donation frequency.
+          example: monthly
+        id:
+          type: string
+          description: Unique identifier for the recurring donation plan.
+          example: RXXXXXXX
+        next_installment_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp in ISO 8601 format, indicating the next scheduled donation installment in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        status:
+          type: string
+          enum:
+          - active
+          - scheduled
+          - paused
+          - retrying
+          - completed
+          - failed
+          - canceled
+          description: Current status of the recurring plan.
+          example: active
+      description: Defines the attributes of a recurring donation plan.
+      required:
+      - id
+      - status
+      - frequency
+      - created_at
+      - ended_at
+      - next_installment_at
+    DonationResponse:
+      type: object
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountResponse'
+        amount:
+          type: string
+          description: Donation amount in the transaction currency.
+          example: '99.99'
+        amount_before_fees_covered:
+          type: string
+          description: Amount before fees were covered by supporter.
+          example: '99.99'
+        amount_before_fees_covered_in_default_currency:
+          type: string
+          description: Donation amount before any fees were covered by the supporter. Displayed in the organization's default currency at the time of donation.
+          example: '59.99'
+        amount_in_default_currency:
+          type: string
+          description: Donation amount converted to the organization's default currency.
+          example: '59.99'
+        anonymous:
+          type: boolean
+          description: Indicates if the donation was made anonymously (`true`) or not (`false`).
+          example: false
+        benefit:
+          oneOf:
+          - title: BenefitNotShownResponse
+            allOf:
+            - $ref: '#/components/schemas/BenefitNotShownResponse'
+            type: object
+            description: Represents the benefit associated with a donation. The fields returned depend on `state`. For `not_shown` and `shown_not_selected`, `state` is the only field. For `selected`, the response also returns the details of the benefit the supporter chose, including its code and fair market value.
+          - title: BenefitShownNotSelectedResponse
+            allOf:
+            - $ref: '#/components/schemas/BenefitShownNotSelectedResponse'
+            type: object
+            description: Represents the benefit associated with a donation. The fields returned depend on `state`. For `not_shown` and `shown_not_selected`, `state` is the only field. For `selected`, the response also returns the details of the benefit the supporter chose, including its code and fair market value.
+          - title: BenefitSelectedResponse
+            allOf:
+            - $ref: '#/components/schemas/BenefitSelectedResponse'
+            type: object
+            description: Represents the benefit associated with a donation. The fields returned depend on `state`. For `not_shown` and `shown_not_selected`, `state` is the only field. For `selected`, the response also returns the details of the benefit the supporter chose, including its code and fair market value.
+          discriminator:
+            propertyName: state
+            mapping:
+              not_shown: '#/components/schemas/BenefitNotShownResponse'
+              shown_not_selected: '#/components/schemas/BenefitShownNotSelectedResponse'
+              selected: '#/components/schemas/BenefitSelectedResponse'
+        campaign:
+          $ref: '#/components/schemas/CampaignResponse'
+        comment:
+          type:
+          - string
+          - 'null'
+          description: Optional comment provided by the supporter at the time of donation.
+          example: Comment example.
+        consent:
+          $ref: '#/components/schemas/CommunicationConsentResponse'
+        created_at:
+          type: string
+          description: Timestamp in ISO 8601 format, indicating when the donation was created in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        currency:
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bgn
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - hrk
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mro
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sll
+          - sle
+          - sos
+          - srd
+          - std
+          - svc
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+          - btc
+          - eth
+          - usdt
+          - usdc
+          - sol
+          - dot
+          - doge
+          - shib
+          - ltc
+          - bch
+          - xtz
+          - fil
+          - ftm
+          - gala
+          - paxg
+          - zec
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.
+          example: usd
+        custom_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomFieldResponse'
+        designation:
+          $ref: '#/components/schemas/DesignationResponse'
+        device:
+          $ref: '#/components/schemas/DeviceResponse'
+        element:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/ElementResponse'
+        failed_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp in ISO 8601 format, indicating when the donation failed in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        fundraiser:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/FundraiserResponse'
+        gift_aid:
+          $ref: '#/components/schemas/GiftAidResponse'
+        id:
+          type: string
+          description: Unique identifier for the donation.
+          example: DXXXXXXX
+        installment:
+          type:
+          - string
+          - 'null'
+          description: Indicates the installment number for recurring donations. Returns `null` for one-time donations.
+          example: '3'
+        livemode:
+          type: boolean
+          description: Test mode indicator. `true` for live mode donations, `false` for test mode donations.
+          example: true
+        on_behalf_of:
+          type:
+          - string
+          - 'null'
+          description: Name of the organization the donation was made on behalf of.
+          example: Example Inc.
+        payment:
+          $ref: '#/components/schemas/ChargePaymentResponse'
+        payout:
+          $ref: '#/components/schemas/PayoutResponse'
+        platform_fee:
+          $ref: '#/components/schemas/PlatformFeeResponse'
+        processing_fee:
+          $ref: '#/components/schemas/ProcessingFeeResponse'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionResponse'
+        receipt_id:
+          type:
+          - string
+          - 'null'
+          description: Unique identifier for the donation receipt.
+        recurring_plan:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/DonationRecurringPlanResponse'
+        refunded_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp in ISO 8601 format, indicating when the donation was refunded in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        source:
+          type: string
+          enum:
+          - website
+          - campaign_page
+          - virtual_terminal
+          - donor_portal
+          - dashboard
+          - recurring_migration
+          - api
+          - gift_cart
+          - tap2pay
+          - p2p_fundraising
+          - giving_station
+          - agent
+          description: Indicates the source of the donation.
+          example: website
+        source_of_funds:
+          type:
+          - string
+          - 'null'
+          enum:
+          - own_money
+          - on_behalf_of
+          - fundraising_or_collection
+          description: Indicates the source of funds for the donation in the context of Gift Aid eligibility.
+        status:
+          type: string
+          enum:
+          - succeeded
+          - failed
+          - refunded
+          - pending
+          - retrying
+          - scheduled
+          description: Current status of the donation.
+          example: succeeded
+        succeeded_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp in ISO 8601 format, indicating when the donation succeeded in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        supporter:
+          $ref: '#/components/schemas/EmbeddedSupporterResponse'
+        supporter_covered_fee:
+          type: string
+          description: Amount of fees covered by the supporter.
+          example: '99.9'
+        supporter_covered_fee_in_default_currency:
+          type: string
+          description: Amount of fees covered by the supporter and converted to the organization's default currency.
+          example: '99.9'
+        tribute:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/TributeResponse'
+        url:
+          type:
+          - string
+          - 'null'
+          description: URL from which the donation was made.
+          example: https://example.com/DXXXXXXX
+        utm:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/UtmResponse'
+        one_time_to_recurring_upgrade_link:
+          type:
+          - string
+          - 'null'
+          description: A permanent, pre-authenticated link that the supporter can use to upgrade this donation to a recurring plan. Returned only when the request includes include=upgrade_link and the donation is eligible.
+      description: Contains donation record with all donation details.
+      required:
+      - id
+      - created_at
+      - comment
+      - account
+      - anonymous
+      - livemode
+      - status
+      - amount
+      - amount_in_default_currency
+      - amount_before_fees_covered
+      - amount_before_fees_covered_in_default_currency
+      - campaign
+      - designation
+      - element
+      - currency
+      - custom_fields
+      - installment
+      - recurring_plan
+      - refunded_at
+      - succeeded_at
+      - failed_at
+      - fundraiser
+      - on_behalf_of
+      - platform_fee
+      - processing_fee
+      - supporter
+      - supporter_covered_fee
+      - supporter_covered_fee_in_default_currency
+      - source
+      - tribute
+      - device
+      - utm
+      - url
+      - payment
+      - payout
+      - receipt_id
+      - questions
+      - gift_aid
+      - consent
+      - benefit
+      - source_of_funds
   securitySchemes:
-    bearerAuth:
-      type: http
+    bearer:
       scheme: bearer
-      description: API key created in the dashboard under Settings > API keys, sent as a Bearer token.
+      bearerFormat: API key
+      type: http

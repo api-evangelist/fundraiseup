@@ -1,0 +1,730 @@
+openapi: 3.2.0
+info:
+  title: Fundraise Up Designations API
+  description: '1. Overview
+
+    2. Limitations
+
+    3. Key features
+
+    4. Use cases
+
+    5. How to get API key
+
+    6. Managing API keys
+
+    7. Authentication
+
+    8. Parent accounts and subaccounts
+
+    9. Rate limits
+
+    10. Errors
+
+    11. Pagination
+
+    12. Request IDs
+
+    13. Changes in API
+
+
+    ## Overview
+
+
+    The Fundraise Up API gives you more control over your fundraising data. Use it to process offline donations through your Fundraise Up account and keep your CRM or other systems up to date with your fundraising activity. With the API, you can interact with these resources:
+
+
+    - Donations — Create and update donations and their associated recurring plans (within 24 hours of creation, API-created only). - Recurring plans — Read recurring donation schedules. - Supporters — Access supporter details. - Events — Retrieve events from your Audit Log. - Donor Portal access links — Authenticate supporters in the Donor Portal. - Donor Portal recurring plan access links — Provide direct access to recurring plan settings. - Campaigns — List and retrieve campaign details, assign and unassign designations. - Designations — Create, update, delete, and list designations, including batch operations. - Designation groups — List and retrieve designation groups, assign and unassign designations. - Designation configurations — Access relationships between designations and campaigns. - Upgrade links — Generate upgrade links for one-time donations to convert them into recurring plans. ## Limitations
+
+
+    - Most endpoints operate on a single object per request. Designation endpoints support batch operations for up to 100 items. - Updates to Donations and Recurring plans are restricted to the first 24 hours and apply only to API-created donations. - You can retrieve and export data only for Donations, Recurring plans, Supporters, Events, Campaigns, Designations, Designation groups, and Designation configurations. - The API supports the following payment methods: credit cards, debit cards, Apple Pay, Google Pay, ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit). - For ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) donations, Fundraise Up sends the mandate confirmation email to the supporter only when `supporter.email` is provided. Without an email, notifying the supporter about the direct debit mandate is the organization''s responsibility. ## Key features
+
+
+    - Architecture — Built on REST principles. - URLs — Provides predictable, resource-oriented URLs. - Requests — Accepts JSON-encoded request bodies with `Content-Type: application/json` header. - Responses — Returns JSON-encoded responses. - Standards — Uses standard HTTP response codes, authentication, and verbs. ## Use cases
+
+
+    There are a variety of use cases where you can integrate our API into your fundraising flow. In particular, you can use our API for:
+
+
+    - Ticketing and events. - Face-to-face fundraising. - Direct mail campaigns. - Telefundraising. - Fundraising galas and dinners. - Analytics integrations. The API is not intended for migrating subscriptions from legacy systems. For migration purposes, please refer to our Migration service. ## How to get API key
+
+
+    To use the Fundraise Up API, you first need to generate an API key. Only users with the Organization Administrator role can create and manage API keys. Follow these steps to create your API key:
+
+
+    1. Go to **Dashboard** > **Settings** > **API keys**. 2. Click **Create API key**. 3. Enter a descriptive name for your API key. This name helps you identify different keys when you have multiple integrations. 4. Set permissions for your key.'
+  version: 1.0.0
+  contact: {}
+servers: []
+tags:
+- name: Designations
+  description: The Designation object represents a fund allocation for a donation, such as restricted or unrestricted giving.
+paths:
+  /v1/designations:
+    get:
+      description: This request lets you retrieve a paginated list of designations from your Fundraise Up account, including designations inherited from the parent account.
+      operationId: GetDesignations
+      parameters:
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designations only exist in live mode — set this to `true`.
+        schema:
+          example: true
+          type: boolean
+      - name: starting_after
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records older than the specified object ID.
+        schema:
+          type: string
+      - name: ending_before
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records newer than the specified object ID.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: This parameter specifies the number of records to display per page, ranging from 1 to 100
+        schema:
+          minimum: 1
+          maximum: 100
+          default: 10
+          type: integer
+      - name: created
+        required: false
+        in: query
+        description: Filters results by the record creation date. Accepts a single date or a date range in RFC 3339 format.
+        schema:
+          $ref: '#/components/schemas/CreatedQuery'
+      - name: campaign
+        required: false
+        in: query
+        description: The ID of the campaign to filter by. Returns designations assigned to the specified campaign.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: On success, the API returns the array of designation objects. If the parameters are invalid, the call will return an error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesignationsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access designations.
+      security:
+      - bearer: []
+      summary: Get designations
+      tags:
+      - Designations
+    post:
+      description: Use this request to create a new designation in your account. Provide a name and an optional code. The designation is created in the account associated with the API key and returned with its details.
+      operationId: CreateDesignation
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDesignationRequest'
+      responses:
+        '200':
+          description: On success, the API returns the created designation object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Designation'
+        '403':
+          description: Forbidden. The API key does not have permission to create designations.
+      security:
+      - bearer: []
+      summary: Create a designation
+      tags:
+      - Designations
+  /v1/designations/{id}:
+    get:
+      description: Use this request to retrieve a single designation by its unique identifier. Returns designation details including account, name, code, and default status.
+      operationId: GetDesignation
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+        schema:
+          example: EXXXXXXX
+          type: string
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designations only exist in live mode — set this to `true`.
+        schema:
+          example: true
+          type: boolean
+      responses:
+        '200':
+          description: On success, the API returns the designation object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Designation'
+        '403':
+          description: Forbidden. The API key does not have permission to access designations.
+        '404':
+          description: Resource not found.
+      security:
+      - bearer: []
+      summary: Get a designation
+      tags:
+      - Designations
+    post:
+      description: Use this request to update a designation. Only the provided fields are updated; omitted fields keep their current values.
+      operationId: UpdateDesignation
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+        schema:
+          example: EXXXXXXX
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDesignationRequest'
+      responses:
+        '200':
+          description: On success, the API returns the updated designation object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Designation'
+        '403':
+          description: Forbidden. The API key does not have permission to update designations.
+        '404':
+          description: Resource not found.
+      security:
+      - bearer: []
+      summary: Update a designation
+      tags:
+      - Designations
+    delete:
+      description: Use this request to delete a designation by its unique identifier. A designation cannot be deleted if it is the default designation of the account or is in use by donations, recurring plans, campaigns, or gift catalogs.
+      operationId: DeleteDesignation
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+        schema:
+          example: EXXXXXXX
+          type: string
+      responses:
+        '200':
+          description: On success, the API returns the identifier of the deleted designation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedDesignation'
+        '403':
+          description: Forbidden. The API key does not have permission to delete designations.
+        '404':
+          description: Resource not found.
+        '409':
+          description: The designation cannot be deleted because it is the default designation of the account or is in use by donations, recurring plans, or gift catalogs.
+      security:
+      - bearer: []
+      summary: Delete a designation
+      tags:
+      - Designations
+  /v1/designations/batch/create:
+    post:
+      description: Use this request to create up to 100 designations in your account in a single call. Each item is processed individually, and the response contains a per-item result with either the created designation or an error.
+      operationId: BatchCreateDesignations
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchCreateDesignationsRequest'
+      responses:
+        '200':
+          description: On success, the API returns the overall status of the bulk operation and an array with the result for each item in the request, in the same order.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchCreateDesignationsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to create designations.
+      security:
+      - bearer: []
+      summary: Create multiple designations
+      tags:
+      - Designations
+  /v1/designations/batch/update:
+    post:
+      description: Use this request to update up to 100 designations in your account in a single call. Only the provided fields are updated; omitted fields keep their current values. Each item is processed individually, and the response contains a per-item result with either the updated designation or an error.
+      operationId: BatchUpdateDesignations
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchUpdateDesignationsRequest'
+      responses:
+        '200':
+          description: On success, the API returns the overall status of the bulk operation and an array with the result for each item in the request, in the same order.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchUpdateDesignationsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to update designations.
+        '422':
+          description: The request contains duplicated ids.
+      security:
+      - bearer: []
+      summary: Update multiple designations
+      tags:
+      - Designations
+  /v1/designations/batch/delete:
+    post:
+      description: Use this request to delete multiple designations at once. Each designation is processed independently. A designation cannot be deleted if it is the default designation of the account or is in use.
+      operationId: BatchDeleteDesignations
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchDeleteDesignationsRequest'
+      responses:
+        '200':
+          description: Returns the result of the batch delete operation, including the status of each designation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchDeleteDesignationsResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to delete designations.
+        '422':
+          description: The request contains duplicated ids.
+      security:
+      - bearer: []
+      summary: Delete multiple designations
+      tags:
+      - Designations
+components:
+  schemas:
+    BatchUpdateDesignationItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+        code:
+          type:
+          - string
+          - 'null'
+          description: Designation code.
+          example: Code-1
+        name:
+          type: string
+          description: Designation name.
+          example: My Designation
+      description: Contains the parameters for a single designation in a batch update request.
+      required:
+      - id
+    BatchDeleteDesignationItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+      description: A single designation to delete.
+      required:
+      - id
+    BatchCreateDesignationsRequest:
+      type: object
+      properties:
+        items:
+          minItems: 1
+          maxItems: 100
+          description: An array of designations to create.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchCreateDesignationItem'
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designations only exist in live mode — set this to `true`.
+          example: true
+      description: Contains the request parameters required for creating multiple designations.
+      required:
+      - items
+    BatchUpdateDesignationsResponse:
+      type: object
+      properties:
+        results:
+          description: An array containing the result for each item in the request, in the same order.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchUpdateDesignationResultItem'
+        status:
+          type: string
+          enum:
+          - complete
+          - partial
+          - failed
+          description: Status of the bulk operation.
+          example: complete
+      description: Provides the per-item results of a batch designation update request.
+      required:
+      - status
+      - results
+    DesignationsResponse:
+      type: object
+      properties:
+        data:
+          description: An array containing the entity records, paginated by any request parameters.
+          type: array
+          items:
+            $ref: '#/components/schemas/Designation'
+        has_more:
+          type: boolean
+          description: Indicates whether there are more records available. For `starting_after`, it shows that there is a page with older records. For `ending_before`, it indicates that there is a page with newer records.
+          example: true
+      description: Provides a paginated response for designations.
+      required:
+      - data
+      - has_more
+    CreatedQuery:
+      type: object
+      properties:
+        created[gt]:
+          type: string
+          format: date-time
+          description: Minimum creation date (exclusive). Returns records after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[gte]:
+          type: string
+          format: date-time
+          description: Minimum creation date (inclusive). Returns records from and after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lt]:
+          type: string
+          format: date-time
+          description: Maximum creation date (exclusive). Returns records before this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lte]:
+          type: string
+          format: date-time
+          description: Maximum creation date (inclusive). Returns records up to and including this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+      description: Filters results by the record creation date. Accepts a single date or a date range in RFC 3339 format.
+    BatchDeleteDesignationError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+          - designation_not_found
+          - designation_is_default
+          - designation_in_use
+          description: Error code.
+          example: designation_not_found
+        message:
+          type: string
+          description: Error message.
+          example: Designation not found.
+      description: Error details for a single designation in the batch delete operation.
+      required:
+      - code
+      - message
+    CreateDesignationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Designation name.
+          example: My Designation
+        code:
+          type:
+          - string
+          - 'null'
+          description: Designation code.
+          example: Code-1
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designations only exist in live mode — set this to `true`.
+          example: true
+      description: Contains the request parameters required for creating a designation.
+      required:
+      - name
+    UpdateDesignationError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+          - designation_not_found
+          description: Error code.
+          example: designation_not_found
+        message:
+          type: string
+          description: Error message.
+          example: Designation not found.
+      description: Describes the error that prevented updating a single designation.
+      required:
+      - code
+      - message
+    AccountResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Custom identifier for the organization, set as the Account code in the Fundraise Up account.
+          example: Code-1
+        id:
+          type: string
+          description: Unique identifier of the organization in the format A[A-Z]{7}.
+          example: AXXXXXXX
+        name:
+          type: string
+          description: The name of the organization as set in the Fundraise Up account.
+          example: Example Account
+      description: Organization account information.
+      required:
+      - id
+      - code
+      - name
+    BatchDeleteDesignationsRequest:
+      type: object
+      properties:
+        items:
+          minItems: 1
+          maxItems: 100
+          description: An array of designations to delete.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchDeleteDesignationItem'
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designations only exist in live mode — set this to `true`.
+          example: true
+      description: Contains the request parameters for deleting multiple designations.
+      required:
+      - items
+    BatchDeleteDesignationResult:
+      type: object
+      properties:
+        error:
+          description: Error object. `null` on success.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/BatchDeleteDesignationError'
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+      description: The result of a single designation in the batch delete operation.
+      required:
+      - id
+      - error
+    BatchCreateDesignationResultItem:
+      type: object
+      properties:
+        designation:
+          description: Created designation object on success, `null` on failure.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/Designation'
+      description: Provides the result of creating a single designation within a batch request.
+      required:
+      - designation
+    BatchCreateDesignationItem:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Designation name.
+          example: My Designation
+        code:
+          type:
+          - string
+          - 'null'
+          description: Designation code.
+          example: Code-1
+      description: Contains the parameters for a single designation in a batch create request.
+      required:
+      - name
+    DeletedDesignation:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the deleted designation.
+          example: EXXXXXXX
+      description: The result of a designation deletion.
+      required:
+      - id
+    Designation:
+      type: object
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountResponse'
+        code:
+          type:
+          - string
+          - 'null'
+          description: Designation code.
+          example: Code-1
+        created_at:
+          type: string
+          description: Timestamp in ISO 8601 format, indicating when the designation was created in UTC.
+          example: '2024-01-01T00:00:00.000Z'
+        id:
+          type: string
+          description: Unique designation identifier.
+          example: EXXXXXXX
+        is_default:
+          type: boolean
+          description: Indicates whether this is the default designation for the account.
+          example: true
+        name:
+          type:
+          - string
+          - 'null'
+          description: Designation name.
+          example: My Designation
+        updated_at:
+          type: string
+          description: Timestamp in ISO 8601 format, indicating when the designation was last updated in UTC.
+          example: '2024-01-31T00:00:00.000Z'
+      description: A designation represents a fund allocation category for donations.
+      required:
+      - id
+      - account
+      - name
+      - code
+      - is_default
+      - created_at
+      - updated_at
+    BatchUpdateDesignationsRequest:
+      type: object
+      properties:
+        items:
+          minItems: 1
+          maxItems: 100
+          description: An array of designations to update.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchUpdateDesignationItem'
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designations only exist in live mode — set this to `true`.
+          example: true
+      description: Contains the request parameters required for updating multiple designations. Only the provided fields are updated.
+      required:
+      - items
+    BatchCreateDesignationsResponse:
+      type: object
+      properties:
+        results:
+          description: An array containing the result for each item in the request, in the same order.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchCreateDesignationResultItem'
+        status:
+          type: string
+          enum:
+          - complete
+          - partial
+          - failed
+          description: Status of the bulk operation.
+          example: complete
+      description: Provides the per-item results of a batch designation create request.
+      required:
+      - status
+      - results
+    BatchUpdateDesignationResultItem:
+      type: object
+      properties:
+        designation:
+          description: Updated designation object on success, `null` on failure.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/Designation'
+        error:
+          description: Error object. `null` on success.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/UpdateDesignationError'
+        id:
+          type: string
+          description: Unique identifier of the designation, formatted as E[A-Z\d]{7}.
+          example: EXXXXXXX
+      description: Provides the result of updating a single designation within a batch request.
+      required:
+      - id
+      - designation
+      - error
+    BatchDeleteDesignationsResponse:
+      type: object
+      properties:
+        results:
+          description: An array containing the result for each item in the request, in the same order.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchDeleteDesignationResult'
+        status:
+          type: string
+          enum:
+          - complete
+          - partial
+          - failed
+          description: Status of the bulk operation.
+          example: complete
+      description: The result of a batch delete designations operation.
+      required:
+      - status
+      - results
+    UpdateDesignationRequest:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Designation code.
+          example: Code-1
+        livemode:
+          type: boolean
+          description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026. Designations only exist in live mode — set this to `true`.
+          example: true
+        name:
+          type: string
+          description: Designation name.
+          example: My Designation
+      description: Contains the request parameters for updating a designation. Only the provided fields are updated.
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: API key
+      type: http

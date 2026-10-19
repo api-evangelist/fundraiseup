@@ -1,0 +1,179 @@
+openapi: 3.2.0
+info:
+  title: Fundraise Up REST Donations API
+  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account.
+  version: '1.0'
+  contact:
+    name: Fundraise Up
+    url: https://fundraiseup.com
+  license:
+    name: Proprietary
+    url: https://fundraiseup.com/terms/
+servers:
+- url: https://api.fundraiseup.com/v1
+  description: Fundraise Up REST API
+security:
+- bearerAuth: []
+tags:
+- name: Donations
+  description: One-time and recurring donations, including offline and ACH donations.
+paths:
+  /donations:
+    get:
+      operationId: listDonations
+      tags:
+      - Donations
+      summary: List donations
+      description: Retrieves donations with cursor-based pagination.
+      parameters:
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/StartingAfter'
+      - $ref: '#/components/parameters/EndingBefore'
+      responses:
+        '200':
+          description: A paginated list of donations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    post:
+      operationId: createDonation
+      tags:
+      - Donations
+      summary: Create a donation
+      description: Creates a one-time or recurring donation, including donations collected outside the website and ACH US Direct Debit donations (which require a Stripe Payment Method ID created in Stripe beforehand).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Donation'
+      responses:
+        '200':
+          description: The created donation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Donation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /donations/{id}:
+    parameters:
+    - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getDonation
+      tags:
+      - Donations
+      summary: Retrieve a donation
+      description: Retrieves the details of a specific donation by ID.
+      responses:
+        '200':
+          description: The requested donation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Donation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      operationId: updateDonation
+      tags:
+      - Donations
+      summary: Update a donation
+      description: Updates a donation. Updates are only permitted within 24 hours of the donation's creation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Donation'
+      responses:
+        '200':
+          description: The updated donation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Donation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    EndingBefore:
+      name: ending_before
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records before it.
+      schema:
+        type: string
+    StartingAfter:
+      name: starting_after
+      in: query
+      required: false
+      description: A cursor (object ID) to fetch the page of records after it.
+      schema:
+        type: string
+    Id:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier of the resource.
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Number of records to return, from 1 to 100.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+  responses:
+    NotFound:
+      description: The requested resource does not exist.
+    TooManyRequests:
+      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
+    Unauthorized:
+      description: The API key is missing or invalid.
+  schemas:
+    Donation:
+      type: object
+      description: A one-time or recurring donation. Field schema to be reconciled against the hosted reference.
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          example: donation
+      additionalProperties: true
+    Pagination:
+      type: object
+      properties:
+        has_more:
+          type: boolean
+          description: Whether more records are available beyond this page.
+    DonationList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Donation'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key created in the dashboard under Settings > API keys, sent as a Bearer token.

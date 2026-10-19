@@ -1,133 +1,487 @@
 openapi: 3.2.0
 info:
-  title: Fundraise Up REST Supporters API
-  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account.
-  version: '1.0'
-  contact:
-    name: Fundraise Up
-    url: https://fundraiseup.com
-  license:
-    name: Proprietary
-    url: https://fundraiseup.com/terms/
-servers:
-- url: https://api.fundraiseup.com/v1
-  description: Fundraise Up REST API
-security:
-- bearerAuth: []
+  title: Fundraise Up Supporters API
+  description: '1. Overview
+
+    2. Limitations
+
+    3. Key features
+
+    4. Use cases
+
+    5. How to get API key
+
+    6. Managing API keys
+
+    7. Authentication
+
+    8. Parent accounts and subaccounts
+
+    9. Rate limits
+
+    10. Errors
+
+    11. Pagination
+
+    12. Request IDs
+
+    13. Changes in API
+
+
+    ## Overview
+
+
+    The Fundraise Up API gives you more control over your fundraising data. Use it to process offline donations through your Fundraise Up account and keep your CRM or other systems up to date with your fundraising activity. With the API, you can interact with these resources:
+
+
+    - Donations — Create and update donations and their associated recurring plans (within 24 hours of creation, API-created only). - Recurring plans — Read recurring donation schedules. - Supporters — Access supporter details. - Events — Retrieve events from your Audit Log. - Donor Portal access links — Authenticate supporters in the Donor Portal. - Donor Portal recurring plan access links — Provide direct access to recurring plan settings. - Campaigns — List and retrieve campaign details, assign and unassign designations. - Designations — Create, update, delete, and list designations, including batch operations. - Designation groups — List and retrieve designation groups, assign and unassign designations. - Designation configurations — Access relationships between designations and campaigns. - Upgrade links — Generate upgrade links for one-time donations to convert them into recurring plans. ## Limitations
+
+
+    - Most endpoints operate on a single object per request. Designation endpoints support batch operations for up to 100 items. - Updates to Donations and Recurring plans are restricted to the first 24 hours and apply only to API-created donations. - You can retrieve and export data only for Donations, Recurring plans, Supporters, Events, Campaigns, Designations, Designation groups, and Designation configurations. - The API supports the following payment methods: credit cards, debit cards, Apple Pay, Google Pay, ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit). - For ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) donations, Fundraise Up sends the mandate confirmation email to the supporter only when `supporter.email` is provided. Without an email, notifying the supporter about the direct debit mandate is the organization''s responsibility. ## Key features
+
+
+    - Architecture — Built on REST principles. - URLs — Provides predictable, resource-oriented URLs. - Requests — Accepts JSON-encoded request bodies with `Content-Type: application/json` header. - Responses — Returns JSON-encoded responses. - Standards — Uses standard HTTP response codes, authentication, and verbs. ## Use cases
+
+
+    There are a variety of use cases where you can integrate our API into your fundraising flow. In particular, you can use our API for:
+
+
+    - Ticketing and events. - Face-to-face fundraising. - Direct mail campaigns. - Telefundraising. - Fundraising galas and dinners. - Analytics integrations. The API is not intended for migrating subscriptions from legacy systems. For migration purposes, please refer to our Migration service. ## How to get API key
+
+
+    To use the Fundraise Up API, you first need to generate an API key. Only users with the Organization Administrator role can create and manage API keys. Follow these steps to create your API key:
+
+
+    1. Go to **Dashboard** > **Settings** > **API keys**. 2. Click **Create API key**. 3. Enter a descriptive name for your API key. This name helps you identify different keys when you have multiple integrations. 4. Set permissions for your key.'
+  version: 1.0.0
+  contact: {}
+servers: []
 tags:
 - name: Supporters
-  description: Donor records (Fundraise Up calls donors "supporters").
+  description: The Supporter object represents a single supporter record. It includes data as displayed on the Supporter page in your Dashboard.
 paths:
-  /supporters:
+  /v1/supporters:
     get:
-      operationId: listSupporters
-      tags:
-      - Supporters
-      summary: List supporters
-      description: Retrieves supporters (donor records) with cursor-based pagination.
+      description: 'Use this request to retrieve a paginated list of supporter records from your Fundraise Up account. Each record includes the latest contact details and other supporter-level fields, matching the data shown in the Supporters view in the Dashboard.
+
+
+        ## About supporter contact data
+
+
+        The `address`, `phone`, and `employer` fields in supporter records reflect the most recent information provided by the supporter.
+
+
+        These fields are updated automatically when:
+
+
+        * The supporter makes a new donation using the same email address.
+
+        * A donation or recurring plan is edited in the Dashboard.
+
+        * The supporter updates their details in the Donor Portal.
+
+
+        Installments do not update supporter-level contact data.
+
+
+        You can''t edit supporter contact fields through the API. To change them, update the associated donation or recurring plan — in the Dashboard at any time, or through the API within 24 hours of creation. The supporter record will reflect the updated values automatically.
+
+
+        This behavior applies only to changes made after June 2, 2025. Data collected earlier is not updated retroactively.
+
+
+        ### Tracking updates using the Events endpoint
+
+
+        To monitor changes to supporter contact data, use the Events endpoint. The following events may indicate a change to supporter contact fields:
+
+
+        * `supporter.updated` — supporter-level data has changed.
+
+        * `donation.updated` — contact fields on a donation were modified.
+
+        * `recurring_plan.details_updated` — a recurring plan was edited.
+
+
+        When you receive one of these events, use the corresponding endpoints to retrieve updated data:
+
+
+        * `GET /supporters/{id}` — get supporter-level contact information.
+
+        * `GET /donations/{id}` — get contact details specific to a donation.
+
+        * `GET /recurring_plans/{id}` — get contact details specific to a recurring plan.'
+      operationId: GetSupporters
       parameters:
-      - $ref: '#/components/parameters/Limit'
-      - $ref: '#/components/parameters/StartingAfter'
-      - $ref: '#/components/parameters/EndingBefore'
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+        schema:
+          example: true
+          type: boolean
+      - name: created
+        required: false
+        in: query
+        schema:
+          $ref: '#/components/schemas/CreatedQuery'
+      - name: starting_after
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records older than the specified object ID.
+        schema:
+          type: string
+      - name: ending_before
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records newer than the specified object ID.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: This parameter specifies the number of records to display per page, ranging from 1 to 100
+        schema:
+          minimum: 1
+          maximum: 100
+          default: 10
+          type: integer
       responses:
         '200':
-          description: A paginated list of supporters.
+          description: On success, the API returns the list of supporters.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupporterList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '429':
-          $ref: '#/components/responses/TooManyRequests'
-  /supporters/{id}:
-    parameters:
-    - $ref: '#/components/parameters/Id'
-    get:
-      operationId: getSupporter
+                $ref: '#/components/schemas/SupportersResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access supporters.
+      security:
+      - bearer: []
+      summary: Get supporters
       tags:
       - Supporters
-      summary: Retrieve a supporter
-      description: Retrieves the details of a specific supporter by ID.
+  /v1/supporters/{id}:
+    get:
+      description: 'Use this request to retrieve a specific supporter record by its unique ID. The response includes all supporter-level fields available in the Dashboard, such as name, email, language, mailing address, phone number, employer, and others.
+
+
+        ## About supporter contact data
+
+
+        The `address`, `phone`, and `employer` fields in supporter records reflect the most recent information provided by the supporter.
+
+
+        These fields are updated automatically when:
+
+        - The supporter makes a new donation using the same email address.
+
+        - A donation or recurring plan is edited in the Dashboard.
+
+        - The supporter updates their details in the Donor Portal.
+
+
+        Installments do not update supporter-level contact data.
+
+
+        You can''t edit supporter contact fields through the API. To change them, update the associated donation or recurring plan. The supporter record will reflect the updated values automatically.
+
+
+        This behavior applies only to changes made after June 2, 2025. Data collected earlier is not updated retroactively.
+
+
+        ### Tracking updates using the Events endpoint
+
+
+        To monitor changes to supporter contact data, use the Events endpoint. The following events may indicate a change to supporter contact fields:
+
+
+        - `supporter.updated` — supporter-level data has changed.
+
+        - `donation.updated` — contact fields on a donation were modified.
+
+        - `recurring_plan.details_updated` — a recurring plan was edited.
+
+
+        When you receive one of these events, use the corresponding endpoints to retrieve updated data:
+
+        - `GET /supporters/{id}` — get supporter-level contact information.
+
+        - `GET /donations/{id}` — get contact details specific to a donation.
+
+        - `GET /recurring_plans/{id}` — get contact details specific to a recurring plan.'
+      operationId: GetSupporter
+      parameters:
+      - name: id
+        required: true
+        in: path
+        description: Unique identifier of the supporter, formatted as S[A-Z]{7}.
+        schema:
+          example: SXXXXXXX
+          type: string
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+        schema:
+          example: true
+          type: boolean
       responses:
         '200':
-          description: The requested supporter.
+          description: On success, the API returns the supporter object.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Supporter'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: '#/components/schemas/SupporterResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access supporters.
+      security:
+      - bearer: []
+      summary: Get a supporter
+      tags:
+      - Supporters
 components:
-  parameters:
-    EndingBefore:
-      name: ending_before
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records before it.
-      schema:
-        type: string
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
-      schema:
-        type: string
-    Id:
-      name: id
-      in: path
-      required: true
-      description: The unique identifier of the resource.
-      schema:
-        type: string
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: Number of records to return, from 1 to 100.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-  responses:
-    NotFound:
-      description: The requested resource does not exist.
-    TooManyRequests:
-      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
-    Unauthorized:
-      description: The API key is missing or invalid.
   schemas:
-    Pagination:
+    AddressResponse:
       type: object
       properties:
-        has_more:
-          type: boolean
-          description: Whether more records are available beyond this page.
-    Supporter:
+        city:
+          type:
+          - string
+          - 'null'
+          description: City name
+          example: Nashville
+        country:
+          type: string
+          description: '[Two-letter country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2), in lowercase.'
+          example: us
+        line1:
+          type:
+          - string
+          - 'null'
+          description: First address line.
+          example: 123 Example St.
+        line2:
+          type:
+          - string
+          - 'null'
+          description: Second address line.
+          example: Apt. 1
+        postal_code:
+          type:
+          - string
+          - 'null'
+          description: Postal or ZIP code.
+          example: '111111'
+        region:
+          type:
+          - string
+          - 'null'
+          description: Can refer to a region, state, or province.
+          example: Tennessee
+      description: Contains the mailing address details.
+      required:
+      - country
+      - city
+      - postal_code
+      - region
+      - line1
+      - line2
+    EmployerResponse:
       type: object
-      description: A supporter (donor) record. Field schema to be reconciled against the hosted reference.
       properties:
+        name:
+          type: string
+          description: Employer's name.
+          example: Fundraise Up Inc.
+      description: Represents the employer information.
+      required:
+      - name
+    SupporterResponse:
+      type: object
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountResponse'
+        address:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/AddressResponse'
+        created_at:
+          type: string
+          description: Timestamp in ISO 8601 format, indicating when the supporter was created, in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        email:
+          type:
+          - string
+          - 'null'
+          description: Email address associated with the supporter.
+          example: example@example.com
+        employer:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/EmployerResponse'
+        employment_status:
+          type:
+          - string
+          - 'null'
+          description: 'The supporter''s current employment status. Possible values: `employed`, `unemployed`, `retired`. Returns `null` if not collected. Only collected for US political organizations.'
+          enum:
+          - employed
+          - unemployed
+          - retired
+          example: employed
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: First name of the supporter.
+          example: Alex
         id:
           type: string
-        object:
+          description: Unique identifier for the supporter.
+          example: SXXXXXXXX
+        language:
           type: string
-          example: supporter
-      additionalProperties: true
-    SupporterList:
-      allOf:
-      - $ref: '#/components/schemas/Pagination'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Supporter'
+          enum:
+          - en-US
+          - en-GB
+          - en-CA
+          - fr-CA
+          - fr-FR
+          - es
+          - nl
+          - 'no'
+          - de
+          - de-x-informal
+          - fi-FI
+          - ar-001
+          - sv
+          - it
+          - pt-PT
+          - pt-BR
+          - zh-CN
+          - zh-TW
+          - ja
+          - ko
+          - hu
+          - da
+          - ru-RU
+          - es-US
+          - pl-PL
+          - he
+          description: Supporter's locale.
+          example: en-CA
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Last name of the supporter.
+          example: Garcia
+        livemode:
+          type: boolean
+          description: Test mode indicator. `true` for supporters in live mode, `false` for supporters in test mode.
+          example: true
+        occupation:
+          type:
+          - string
+          - 'null'
+          description: The supporter's current occupation. Returns `null` if not collected or if employment status is `unemployed` or `retired`. Max 200 characters.
+          example: Software Engineer
+        phone:
+          type:
+          - string
+          - 'null'
+          description: Supporter's phone number.
+          example: +1 (111) 111111
+        title:
+          type:
+          - string
+          - 'null'
+          description: Supporter's title. For organizations in Germany and Austria, any value up to 100 characters. Returns `null` if empty.
+          example: mr
+      description: Contains supporter details.
+      required:
+      - id
+      - created_at
+      - account
+      - livemode
+      - email
+      - first_name
+      - last_name
+      - title
+      - phone
+      - employer
+      - employment_status
+      - occupation
+      - address
+      - language
+    AccountResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Custom identifier for the organization, set as the Account code in the Fundraise Up account.
+          example: Code-1
+        id:
+          type: string
+          description: Unique identifier of the organization in the format A[A-Z]{7}.
+          example: AXXXXXXX
+        name:
+          type: string
+          description: The name of the organization as set in the Fundraise Up account.
+          example: Example Account
+      description: Organization account information.
+      required:
+      - id
+      - code
+      - name
+    CreatedQuery:
+      type: object
+      properties:
+        created[gt]:
+          type: string
+          format: date-time
+          description: Minimum creation date (exclusive). Returns records after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[gte]:
+          type: string
+          format: date-time
+          description: Minimum creation date (inclusive). Returns records from and after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lt]:
+          type: string
+          format: date-time
+          description: Maximum creation date (exclusive). Returns records before this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lte]:
+          type: string
+          format: date-time
+          description: Maximum creation date (inclusive). Returns records up to and including this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+      description: Filters results by the record creation date. Accepts a single date or a date range in RFC 3339 format.
+    SupportersResponse:
+      type: object
+      properties:
+        data:
+          description: An array containing the entity records, paginated by any request parameters.
+          type: array
+          items:
+            $ref: '#/components/schemas/SupporterResponse'
+        has_more:
+          type: boolean
+          description: Indicates whether there are more records available. For `starting_after`, it shows that there is a page with older records. For `ending_before`, it indicates that there is a page with newer records.
+          example: true
+      description: Provides a paginated response for supporters.
+      required:
+      - data
+      - has_more
   securitySchemes:
-    bearerAuth:
-      type: http
+    bearer:
       scheme: bearer
-      description: API key created in the dashboard under Settings > API keys, sent as a Bearer token.
+      bearerFormat: API key
+      type: http

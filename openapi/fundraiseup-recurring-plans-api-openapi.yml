@@ -1,179 +1,1787 @@
 openapi: 3.2.0
 info:
-  title: Fundraise Up REST Recurring Plans API
-  description: The Fundraise Up REST API gives programmatic access to fundraising data for a nonprofit's Fundraise Up account.
-  version: '1.0'
-  contact:
-    name: Fundraise Up
-    url: https://fundraiseup.com
-  license:
-    name: Proprietary
-    url: https://fundraiseup.com/terms/
-servers:
-- url: https://api.fundraiseup.com/v1
-  description: Fundraise Up REST API
-security:
-- bearerAuth: []
+  title: Fundraise Up Recurring plans API
+  description: '1. Overview
+
+    2. Limitations
+
+    3. Key features
+
+    4. Use cases
+
+    5. How to get API key
+
+    6. Managing API keys
+
+    7. Authentication
+
+    8. Parent accounts and subaccounts
+
+    9. Rate limits
+
+    10. Errors
+
+    11. Pagination
+
+    12. Request IDs
+
+    13. Changes in API
+
+
+    ## Overview
+
+
+    The Fundraise Up API gives you more control over your fundraising data. Use it to process offline donations through your Fundraise Up account and keep your CRM or other systems up to date with your fundraising activity. With the API, you can interact with these resources:
+
+
+    - Donations — Create and update donations and their associated recurring plans (within 24 hours of creation, API-created only). - Recurring plans — Read recurring donation schedules. - Supporters — Access supporter details. - Events — Retrieve events from your Audit Log. - Donor Portal access links — Authenticate supporters in the Donor Portal. - Donor Portal recurring plan access links — Provide direct access to recurring plan settings. - Campaigns — List and retrieve campaign details, assign and unassign designations. - Designations — Create, update, delete, and list designations, including batch operations. - Designation groups — List and retrieve designation groups, assign and unassign designations. - Designation configurations — Access relationships between designations and campaigns. - Upgrade links — Generate upgrade links for one-time donations to convert them into recurring plans. ## Limitations
+
+
+    - Most endpoints operate on a single object per request. Designation endpoints support batch operations for up to 100 items. - Updates to Donations and Recurring plans are restricted to the first 24 hours and apply only to API-created donations. - You can retrieve and export data only for Donations, Recurring plans, Supporters, Events, Campaigns, Designations, Designation groups, and Designation configurations. - The API supports the following payment methods: credit cards, debit cards, Apple Pay, Google Pay, ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit). - For ACH US Direct Debit, BACS Direct Debit, and PAD (Canadian Pre-Authorized Debit) donations, Fundraise Up sends the mandate confirmation email to the supporter only when `supporter.email` is provided. Without an email, notifying the supporter about the direct debit mandate is the organization''s responsibility. ## Key features
+
+
+    - Architecture — Built on REST principles. - URLs — Provides predictable, resource-oriented URLs. - Requests — Accepts JSON-encoded request bodies with `Content-Type: application/json` header. - Responses — Returns JSON-encoded responses. - Standards — Uses standard HTTP response codes, authentication, and verbs. ## Use cases
+
+
+    There are a variety of use cases where you can integrate our API into your fundraising flow. In particular, you can use our API for:
+
+
+    - Ticketing and events. - Face-to-face fundraising. - Direct mail campaigns. - Telefundraising. - Fundraising galas and dinners. - Analytics integrations. The API is not intended for migrating subscriptions from legacy systems. For migration purposes, please refer to our Migration service. ## How to get API key
+
+
+    To use the Fundraise Up API, you first need to generate an API key. Only users with the Organization Administrator role can create and manage API keys. Follow these steps to create your API key:
+
+
+    1. Go to **Dashboard** > **Settings** > **API keys**. 2. Click **Create API key**. 3. Enter a descriptive name for your API key. This name helps you identify different keys when you have multiple integrations. 4. Set permissions for your key.'
+  version: 1.0.0
+  contact: {}
+servers: []
 tags:
-- name: Recurring Plans
-  description: Recurring donation plans modeling a supporter's ongoing giving.
+- name: Recurring plans
+  description: The Recurring Plan object represents a single recurring donation plan. It includes supporter data, which is displayed as it appears on the Recurring Plan page in your Dashboard.
 paths:
-  /recurring_plans:
+  /v1/recurring_plans:
     get:
-      operationId: listRecurringPlans
-      tags:
-      - Recurring Plans
-      summary: List recurring plans
-      description: Retrieves recurring donation plans with cursor-based pagination.
+      description: This request allows you to read your Fundraise Up recurring plan records. The supporter data will be displayed as it appears on the Recurring plan page in your Dashboard.
+      operationId: GetRecurringPlans
       parameters:
-      - $ref: '#/components/parameters/Limit'
-      - $ref: '#/components/parameters/StartingAfter'
-      - $ref: '#/components/parameters/EndingBefore'
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+        schema:
+          example: true
+          type: boolean
+      - name: starting_after
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records older than the specified object ID.
+        schema:
+          type: string
+      - name: ending_before
+        required: false
+        in: query
+        description: A cursor for pagination. Returns records newer than the specified object ID.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: This parameter specifies the number of records to display per page, ranging from 1 to 100
+        schema:
+          minimum: 1
+          maximum: 100
+          default: 10
+          type: integer
+      - name: created
+        required: false
+        in: query
+        schema:
+          $ref: '#/components/schemas/CreatedQuery'
       responses:
         '200':
-          description: A paginated list of recurring plans.
+          description: On success, the API returns the list of recurring plans. The response includes the recurring plan data array and a boolean indicating if more records are available.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RecurringPlanList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '429':
-          $ref: '#/components/responses/TooManyRequests'
-    post:
-      operationId: createRecurringPlan
+                $ref: '#/components/schemas/RecurringPlansResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access recurring plans.
+      security:
+      - bearer: []
+      summary: Get recurring plans
       tags:
-      - Recurring Plans
-      summary: Create a recurring plan
-      description: Creates a recurring donation plan.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RecurringPlan'
-      responses:
-        '200':
-          description: The created recurring plan.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RecurringPlan'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '429':
-          $ref: '#/components/responses/TooManyRequests'
-  /recurring_plans/{id}:
-    parameters:
-    - $ref: '#/components/parameters/Id'
+      - Recurring plans
+  /v1/recurring_plans/{id}:
     get:
-      operationId: getRecurringPlan
-      tags:
-      - Recurring Plans
-      summary: Retrieve a recurring plan
-      description: Retrieves the details of a specific recurring plan by ID.
-      responses:
-        '200':
-          description: The requested recurring plan.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RecurringPlan'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    post:
-      operationId: updateRecurringPlan
-      tags:
-      - Recurring Plans
-      summary: Update a recurring plan
-      description: Updates a recurring plan. Updates are only permitted within 24 hours of the plan's creation.
-      requestBody:
+      description: This request allows you to read your Fundraise Up recurring plan record. The supporter data will be displayed as it appears on the Recurring plan page in your Dashboard.
+      operationId: GetRecurringPlan
+      parameters:
+      - name: id
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RecurringPlan'
+        in: path
+        description: Unique identifier of the recurring plan, formatted as R[A-Z]{7}.
+        schema:
+          example: RXXXXXXX
+          type: string
+      - name: livemode
+        required: false
+        in: query
+        description: Specifies whether the request is executed in live or test mode. Required for API keys created after 30th January 2026.
+        schema:
+          example: true
+          type: boolean
       responses:
         '200':
-          description: The updated recurring plan.
+          description: On success, the API returns the recurring plan object.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RecurringPlan'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: '#/components/schemas/RecurringPlanResponse'
+        '403':
+          description: Forbidden. The API key does not have permission to access recurring plans.
+      security:
+      - bearer: []
+      summary: Get a recurring plan
+      tags:
+      - Recurring plans
 components:
   schemas:
-    RecurringPlan:
+    IpResponse:
       type: object
-      description: A recurring donation plan. Field schema to be reconciled against the hosted reference.
+      properties:
+        address:
+          type:
+          - string
+          - 'null'
+          description: IP address.
+          example: 111.111.111.111
+        city:
+          type:
+          - string
+          - 'null'
+          description: City name.
+          example: Nashville
+        country_name:
+          type:
+          - string
+          - 'null'
+          description: Full country name.
+          example: United States
+        region:
+          type:
+          - string
+          - 'null'
+          description: Region name.
+          example: Tennessee
+      description: Contains details about the IP address from which the donation was made.
+      required:
+      - address
+      - country_name
+      - region
+      - city
+    UtmResponse:
+      type: object
+      properties:
+        campaign:
+          type:
+          - string
+          - 'null'
+          description: The `utm_campaign` value, if available. Shows the name of the marketing campaign.
+          example: giving_tuesday
+        content:
+          type:
+          - string
+          - 'null'
+          description: The `utm_content` value, if available. Identifies which link or ad variation was clicked.
+          example: textlink
+        medium:
+          type:
+          - string
+          - 'null'
+          description: The `utm_medium` value, if available. Shows the type of marketing channel.
+          example: email
+        source:
+          type:
+          - string
+          - 'null'
+          description: The `utm_source` value, if available. Shows where the traffic came from.
+          example: google
+        term:
+          type:
+          - string
+          - 'null'
+          description: The `utm_term` value, if available. Shows the keywords used in a search.
+          example: how_to_support_penguins
+      description: Represents UTM tags associated with the donation.
+      required:
+      - source
+      - campaign
+      - content
+      - medium
+      - term
+    RecurringPlansResponse:
+      type: object
+      properties:
+        data:
+          description: An array containing the entity records, paginated by any request parameters.
+          type: array
+          items:
+            $ref: '#/components/schemas/RecurringPlanResponse'
+        has_more:
+          type: boolean
+          description: Indicates whether there are more records available. For `starting_after`, it shows that there is a page with older records. For `ending_before`, it indicates that there is a page with newer records.
+          example: true
+      description: Provides a response for recurring plans.
+      required:
+      - data
+      - has_more
+    ElementResponse:
+      type: object
       properties:
         id:
           type: string
-        object:
+          description: Unique element identifier.
+          example: XXXXXXXX
+        name:
           type: string
-          example: recurring_plan
-      additionalProperties: true
-    Pagination:
+          description: Name of the element.
+          example: My Element
+        type:
+          type: string
+          description: Type of element used for the donation.
+          example: donationForm
+          enum:
+          - reminder
+          - donateButton
+          - stickyButton
+          - imageCard
+          - textLink
+          - donationForm
+          - simpleForm
+          - goalMeter
+          - statCounter
+          - impactSlider
+          - donationLevels
+          - buttonGroup
+          - floatingButton
+          - messageBar
+          - topSupporters
+          - topLocations
+          - socialProof
+          - qrCode
+          - recentDonations
+          - p2pButton
+          - p2pLink
+          - p2pFundraisingButton
+          - p2pFundraisingLink
+          - topFundraisers
+          - donorMap
+          - lightbox
+          - zakatAlMalCalculator
+          - zakatAlFitrCalculator
+          - fidiyahKaffarahCalculator
+          - p2pFundraiserGallery
+          - p2pTopFundraisers
+          - fundraisingPageLink
+          - fundraisingPageInviteLink
+          - link
+          - direct
+          - debugPanel
+          - testModePanel
+          - aiAssistant
+          - splitTesting
+          - jsApi
+      description: Represents the element through which the donation was made.
+      required:
+      - id
+      - type
+      - name
+    TributeRecipientResponse:
       type: object
       properties:
-        has_more:
+        address:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/RecipientAddressResponse'
+        email:
+          type:
+          - string
+          - 'null'
+          description: Email address used for `email` sharing type.
+          example: example@example.com
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Tribute recipient's first name.
+          example: Sidney
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Tribute recipient's last name.
+          example: Jones
+        title:
+          type:
+          - string
+          - 'null'
+          description: Tribute recipient's title.
+          example: mr
+      description: Contains details about the tribute recipient.
+      required:
+      - title
+      - first_name
+      - last_name
+      - email
+      - address
+    CampaignResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Campaign code, as set in the Dashboard.
+          example: Code-1
+        id:
+          type: string
+          description: Unique campaign identifier.
+          example: FUNXXXXXXXX
+        name:
+          type: string
+          description: Campaign name.
+          example: My Campaign
+      description: Provides details about the campaign.
+      required:
+      - id
+      - code
+      - name
+    CreatedQuery:
+      type: object
+      properties:
+        created[gt]:
+          type: string
+          format: date-time
+          description: Minimum creation date (exclusive). Returns records after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[gte]:
+          type: string
+          format: date-time
+          description: Minimum creation date (inclusive). Returns records from and after this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lt]:
+          type: string
+          format: date-time
+          description: Maximum creation date (exclusive). Returns records before this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+        created[lte]:
+          type: string
+          format: date-time
+          description: Maximum creation date (inclusive). Returns records up to and including this timestamp.
+          example: '2025-01-01T12:30:00+02:00'
+      description: Filters results by the record creation date. Accepts a single date or a date range in RFC 3339 format.
+    CustomFieldResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the custom field.
+          example: Field1
+        value:
+          type: string
+          description: Value of the custom field.
+          example: Value1
+      description: 'Represents custom fields populated according to the campaign settings.
+
+
+        Missing fields will be populated with default non-blank values from the campaign settings.'
+      required:
+      - name
+      - value
+    BankAccountResponse:
+      type: object
+      properties:
+        last4:
+          type:
+          - string
+          - 'null'
+          description: Last four digits of the bank account number.
+          example: '1234'
+      description: Contains information about the bank account used for the payment.
+      required:
+      - last4
+    AddressResponse:
+      type: object
+      properties:
+        city:
+          type:
+          - string
+          - 'null'
+          description: City name
+          example: Nashville
+        country:
+          type: string
+          description: '[Two-letter country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2), in lowercase.'
+          example: us
+        line1:
+          type:
+          - string
+          - 'null'
+          description: First address line.
+          example: 123 Example St.
+        line2:
+          type:
+          - string
+          - 'null'
+          description: Second address line.
+          example: Apt. 1
+        postal_code:
+          type:
+          - string
+          - 'null'
+          description: Postal or ZIP code.
+          example: '111111'
+        region:
+          type:
+          - string
+          - 'null'
+          description: Can refer to a region, state, or province.
+          example: Tennessee
+      description: Contains the mailing address details.
+      required:
+      - country
+      - city
+      - postal_code
+      - region
+      - line1
+      - line2
+    CommunicationConsentResponse:
+      type: object
+      properties:
+        customized:
+          $ref: '#/components/schemas/CustomizedCommunicationConsentResponse'
+        general:
+          type: string
+          description: 'Indicates overall communication consent.
+
+
+            `opted_in` if the supporter agreed to receive communications.
+
+
+            `opted_out` if the supporter declined communications.
+
+
+            `not_submitted` if no consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_in
+      description: Stores the supporter's [communication consent type](https://fundraiseup.com/docs/marketing-consent/) associated with a donation.
+    TributeSharingResponse:
+      type: object
+      properties:
+        from:
+          type:
+          - string
+          - 'null'
+          description: Name of the sender.
+          example: Alex Garcia
+        hide_amount:
           type: boolean
-          description: Whether more records are available beyond this page.
-    RecurringPlanList:
-      allOf:
-      - $ref: '#/components/schemas/Pagination'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/RecurringPlan'
-  parameters:
-    EndingBefore:
-      name: ending_before
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records before it.
-      schema:
-        type: string
-    StartingAfter:
-      name: starting_after
-      in: query
-      required: false
-      description: A cursor (object ID) to fetch the page of records after it.
-      schema:
-        type: string
-    Id:
-      name: id
-      in: path
-      required: true
-      description: The unique identifier of the resource.
-      schema:
-        type: string
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: Number of records to return, from 1 to 100.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-  responses:
-    NotFound:
-      description: The requested resource does not exist.
-    TooManyRequests:
-      description: Rate limit exceeded (8 requests/second or 128 requests/minute).
-    Unauthorized:
-      description: The API key is missing or invalid.
+          description: Indicates whether the donation amount should be hidden in the tribute notification sent to the recipient.
+          example: false
+        message:
+          type:
+          - string
+          - 'null'
+          description: Custom message included in the tribute.
+          example: In loving memory of Jordan
+        recipient:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/TributeRecipientResponse'
+        type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - email
+          - address
+          description: Sharing method.
+          example: email
+      description: Defines the sharing options for a tribute.
+      required:
+      - type
+      - from
+      - message
+      - recipient
+      - hide_amount
+    AccountResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Custom identifier for the organization, set as the Account code in the Fundraise Up account.
+          example: Code-1
+        id:
+          type: string
+          description: Unique identifier of the organization in the format A[A-Z]{7}.
+          example: AXXXXXXX
+        name:
+          type: string
+          description: The name of the organization as set in the Fundraise Up account.
+          example: Example Account
+      description: Organization account information.
+      required:
+      - id
+      - code
+      - name
+    QuestionResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Question code, as set in the Dashboard.
+          example: Code-1
+        id:
+          type: string
+          description: Unique identifier of the question, formatted as Q[A-Z]{7}. Located in [Settings > Questions](https://dashboard.fundraiseup.com/settings/questions).
+          example: QXXXXXXX
+        checked:
+          type: boolean
+          description: Indicates whether the checkbox is selected. Required for questions with the type "Single checkbox".
+          example: true
+        options:
+          type: array
+          items:
+            type: string
+          description: List of selected options. Required for questions with the type "Multiple checkboxes".
+          example:
+          - OK
+          - Good
+        text:
+          type: string
+          description: Answer for the question. This field is returned only for question types "Text box", "Text line", "Select one option", and "Dropdown menu".
+          example: Example answer
+      description: 'Provides information about a question used in the donation process.
+
+
+        Each item must include an `id` and, depending on the question type, one of the following fields: `text`, `options`, or `checked`.'
+      required:
+      - id
+      - code
+    EmployerResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Employer's name.
+          example: Fundraise Up Inc.
+      description: Represents the employer information.
+      required:
+      - name
+    CustomizedCommunicationConsentResponse:
+      type: object
+      properties:
+        email:
+          type: string
+          description: 'Indicates email communication consent.
+
+
+            `opted_in` if the supporter agreed to receive emails.
+
+
+            `opted_out` if the supporter declined email communication.
+
+
+            `not_submitted` if no email consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_in
+        phone_calls:
+          type: string
+          description: 'Indicates phone call communication consent.
+
+
+            `opted_in` if the supporter agreed to receive phone calls.
+
+
+            `opted_out` if the supporter declined to receive phone calls.
+
+
+            `not_submitted` if no phone call consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_out
+        postal_mail:
+          type: string
+          description: 'Indicates postal mail communication consent.
+
+
+            `opted_in` if the supporter agreed to receive postal mail.
+
+
+            `opted_out` if the supporter declined to receive postal mail.
+
+
+            `not_submitted` if no postal mail consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_in
+        sms:
+          type: string
+          description: 'Indicates SMS communication consent.
+
+
+            `opted_in` if the supporter agreed to receive SMS messages.
+
+
+            `opted_out` if the supporter declined SMS communication.
+
+
+            `not_submitted` if no SMS consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_in
+        social_media:
+          type: string
+          description: 'Indicates social media communication consent.
+
+
+            `opted_in` if the supporter agreed to receive messages through social media.
+
+
+            `opted_out` if the supporter declined social media communication.
+
+
+            `not_submitted` if no social media consent data is available.'
+          enum:
+          - not_submitted
+          - opted_in
+          - opted_out
+          example: opted_out
+      description: Specifies consent values for individual communication channels.
+      required:
+      - email
+      - phone_calls
+      - sms
+      - postal_mail
+      - social_media
+    RecurringPlanResponse:
+      type: object
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountResponse'
+        amount:
+          type: string
+          description: Donation amount for each recurring installment, in the plan's currency.
+          example: '99.99'
+        amount_before_fees_covered:
+          type: string
+          description: Amount before fees were covered by supporter.
+          example: '99.99'
+        amount_before_fees_covered_in_default_currency:
+          type: string
+          description: Amount before fees were covered by supporter, converted to the organization's default currency at the time of the donation.
+          example: '59.99'
+        amount_in_default_currency:
+          type: string
+          description: Donation amount for each recurring installment, converted to the organization's default currency at the time of the donation.
+          example: '59.99'
+        anonymous:
+          type: boolean
+          description: Indicates if the recurring donations are made anonymously (`true`) or not (`false`).
+          example: false
+        benefit:
+          oneOf:
+          - title: BenefitNotShownResponse
+            allOf:
+            - $ref: '#/components/schemas/BenefitNotShownResponse'
+            type: object
+            description: Represents the benefit associated with a recurring plan.
+          - title: BenefitShownNotSelectedResponse
+            allOf:
+            - $ref: '#/components/schemas/BenefitShownNotSelectedResponse'
+            type: object
+            description: Represents the benefit associated with a recurring plan.
+          - title: BenefitSelectedResponse
+            allOf:
+            - $ref: '#/components/schemas/BenefitSelectedResponse'
+            type: object
+            description: Represents the benefit associated with a recurring plan.
+          discriminator:
+            propertyName: state
+            mapping:
+              not_shown: '#/components/schemas/BenefitNotShownResponse'
+              shown_not_selected: '#/components/schemas/BenefitShownNotSelectedResponse'
+              selected: '#/components/schemas/BenefitSelectedResponse'
+        campaign:
+          $ref: '#/components/schemas/CampaignResponse'
+        cancellation_details:
+          type:
+          - string
+          - 'null'
+          description: Additional details about the cancellation provided by the supporter. Can be `null` when not provided or when the plan is not canceled.
+          example: Moving to a different organization
+        cancellation_reason:
+          type:
+          - string
+          - 'null'
+          enum:
+          - financial_difficulty
+          - life_changes
+          - switched_donation_method
+          - change_in_giving_preferences
+          - subscription_consolidation
+          - loss_of_confidence_in_organization
+          - technical_error
+          - created_by_mistake
+          - no_clear_reason_given
+          - other
+          description: The reason category selected when the recurring plan was canceled. Can be `null` when no reason category was selected or when the plan is not canceled.
+          example: financial_difficulty
+        comment:
+          type:
+          - string
+          - 'null'
+          description: Optional comment attached to the recurring donation plan.
+          example: comment example
+        consent:
+          $ref: '#/components/schemas/CommunicationConsentResponse'
+        created_at:
+          type: string
+          description: Timestamp in ISO 8601 format, indicating when the recurring plan was created in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        currency:
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bgn
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - hrk
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mro
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sll
+          - sle
+          - sos
+          - srd
+          - std
+          - svc
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+          - btc
+          - eth
+          - usdt
+          - usdc
+          - sol
+          - dot
+          - doge
+          - shib
+          - ltc
+          - bch
+          - xtz
+          - fil
+          - ftm
+          - gala
+          - paxg
+          - zec
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.
+          example: usd
+        custom_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomFieldResponse'
+        designation:
+          $ref: '#/components/schemas/DesignationResponse'
+        device:
+          $ref: '#/components/schemas/DeviceResponse'
+        element:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/ElementResponse'
+        ended_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp in ISO 8601 format, indicating when the recurring plan ended in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        frequency:
+          type: string
+          enum:
+          - daily
+          - weekly
+          - biweekly
+          - every4weeks
+          - monthly
+          - bimonthly
+          - quarterly
+          - semiannual
+          - annual
+          description: Frequency of the recurring plan.
+          example: monthly
+        fundraiser:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/FundraiserResponse'
+        gift_aid:
+          $ref: '#/components/schemas/GiftAidResponse'
+        id:
+          type: string
+          description: Unique identifier for the recurring donation plan.
+          example: RXXXXXXX
+        livemode:
+          type: boolean
+          description: Test mode indicator. `true` for recurring plans in live mode, `false` for recurring plans in test mode.
+          example: true
+        next_installment_at:
+          type:
+          - string
+          - 'null'
+          description: Timestamp in ISO 8601 format, indicating the next scheduled donation installment in UTC.
+          example: '2024-12-20T00:00:00.000Z'
+        on_behalf_of:
+          type:
+          - string
+          - 'null'
+          description: Name of the organization the donation was made on behalf of.
+          example: Example Inc.
+        payment:
+          $ref: '#/components/schemas/RecurringPaymentResponse'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionResponse'
+        source:
+          type: string
+          enum:
+          - website
+          - campaign_page
+          - virtual_terminal
+          - donor_portal
+          - dashboard
+          - recurring_migration
+          - api
+          - gift_cart
+          - tap2pay
+          - p2p_fundraising
+          - giving_station
+          - agent
+          description: Source of the recurring donation setup.
+          example: website
+        source_of_funds:
+          type:
+          - string
+          - 'null'
+          enum:
+          - own_money
+          - on_behalf_of
+          - fundraising_or_collection
+          description: Indicates the source of funds for the donation in the context of Gift Aid eligibility.
+        status:
+          type: string
+          enum:
+          - active
+          - scheduled
+          - paused
+          - retrying
+          - completed
+          - failed
+          - canceled
+          description: Status of the recurring plan.
+          example: active
+        supporter:
+          $ref: '#/components/schemas/EmbeddedSupporterResponse'
+        supporter_covered_fee:
+          type: string
+          description: Amount of fees covered by the supporter.
+          example: '9.99'
+        supporter_covered_fee_in_default_currency:
+          type: string
+          description: Amount of fees covered by the supporter and converted to the organization's default currency.
+          example: '99.9'
+        tribute:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/TributeResponse'
+        url:
+          type:
+          - string
+          - 'null'
+          description: URL where the recurring donation was set up.
+          example: https://example.com/RXXXXXXX
+        utm:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/UtmResponse'
+      description: Contains details about a recurring plan.
+      required:
+      - id
+      - created_at
+      - ended_at
+      - next_installment_at
+      - account
+      - campaign
+      - element
+      - supporter
+      - amount
+      - amount_in_default_currency
+      - amount_before_fees_covered
+      - amount_before_fees_covered_in_default_currency
+      - on_behalf_of
+      - supporter_covered_fee
+      - supporter_covered_fee_in_default_currency
+      - status
+      - frequency
+      - currency
+      - comment
+      - device
+      - url
+      - livemode
+      - anonymous
+      - source
+      - custom_fields
+      - designation
+      - utm
+      - questions
+      - tribute
+      - fundraiser
+      - payment
+      - gift_aid
+      - consent
+      - benefit
+      - source_of_funds
+      - cancellation_reason
+      - cancellation_details
+    GiftAidResponse:
+      type: object
+      properties:
+        claimed:
+          type:
+          - boolean
+          - 'null'
+          description: Indicates whether the Gift Aid was claimed (`true`) or not (`false`).
+          example: true
+        legal_text:
+          type: string
+          description: Legal text associated with Gift Aid.
+          example: I am a UK taxpayer and want to claim Gift Aid.
+      description: Provides details about Gift Aid, available only for organizations based in Great Britain.
+      required:
+      - claimed
+      - legal_text
+    DeviceResponse:
+      type: object
+      properties:
+        browser:
+          type:
+          - string
+          - 'null'
+          description: Browser name. Can be `null` if not detected.
+          example: Chrome
+        ip:
+          $ref: '#/components/schemas/IpResponse'
+        os:
+          type:
+          - string
+          - 'null'
+          description: Operating system name. Can be `null` if not detected.
+          example: MacOS
+        type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - desktop
+          - mobile
+          - tablet
+          description: Device type. Can be `null` if not detected.
+          example: desktop
+        user_agent:
+          type:
+          - string
+          - 'null'
+          description: Raw user agent string. Can be `null` if not provided.
+          example: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
+      description: Provides information about the device being used.
+      required:
+      - browser
+      - os
+      - type
+      - user_agent
+      - ip
+    RecurringPaymentResponse:
+      type: object
+      properties:
+        bank_account:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/BankAccountResponse'
+        credit_card:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/CreditCardResponse'
+        email:
+          type:
+          - string
+          - 'null'
+          description: Email associated with the payment method.
+          example: example@example.com
+        error_message:
+          type:
+          - string
+          - 'null'
+          description: Most recent payment error message. Returned only if the status is `failed` or `retrying`. Otherwise, returns `null`.
+          example: Something went wrong
+        method:
+          type: string
+          enum:
+          - credit_card
+          - apple_pay
+          - google_pay
+          - click_to_pay
+          - ach
+          - paypal
+          - venmo
+          - becs_direct_debit
+          - bacs_direct_debit
+          - pad
+          - sepa_direct_debit
+          - ideal
+          - crypto
+          - stock
+          - link
+          - twint
+          - mobile_pay
+          - wero
+          - revolut_pay
+          - cash_app_pay
+          - eps
+          - daf
+          description: 'Payment method, in lowercase underscore. `stock` is deprecated but may still appear in retrieved data.
+
+
+            The value of `us_bank_account` maps to `ach`. The value of `plaid` also maps to `ach`.'
+          example: paypal
+        processor:
+          type: string
+          enum:
+          - stripe
+          - paypal
+          - gemini
+          - manual_brokerage
+          - coinbase_commerce
+          - chariot
+          description: Payment processor, in lowercase. `coinbase_commerce` is deprecated but may still appear in retrieved data.
+          example: stripe
+      description: Provides details about the payment processing.
+      required:
+      - email
+      - error_message
+      - method
+      - processor
+      - credit_card
+      - bank_account
+    RecipientAddressResponse:
+      type: object
+      properties:
+        city:
+          type:
+          - string
+          - 'null'
+          description: City name
+          example: Nashville
+        country:
+          type: string
+          description: '[Two-letter country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2), in lowercase.'
+          example: us
+        line1:
+          type:
+          - string
+          - 'null'
+          description: First address line.
+          example: 123 Example St.
+        line2:
+          type:
+          - string
+          - 'null'
+          description: Second address line.
+          example: Apt. 1
+        postal_code:
+          type:
+          - string
+          - 'null'
+          description: Postal or ZIP code.
+          example: '111111'
+        region:
+          type:
+          - string
+          - 'null'
+          description: Can refer to a region, state, or province.
+          example: Tennessee
+      description: Provides the postal address for the tribute recipient.
+      required:
+      - country
+      - city
+      - postal_code
+      - region
+      - line1
+      - line2
+    BenefitShipping:
+      type: object
+      properties:
+        address:
+          description: Contains the mailing address details.
+          allOf:
+          - $ref: '#/components/schemas/AddressResponse'
+        recipient_first_name:
+          type: string
+          description: Recipient first name.
+          example: Alex
+        recipient_last_name:
+          type: string
+          description: Recipient last name.
+          example: Garcia
+      description: Shipping data of the benefit.
+      required:
+      - recipient_first_name
+      - recipient_last_name
+      - address
+    BenefitNotShownResponse:
+      type: object
+      properties:
+        state:
+          type: string
+          enum:
+          - not_shown
+          description: The benefit was not shown to the supporter.
+      description: Benefit was not displayed to the supporter.
+      required:
+      - state
+    FundraiserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the fundraiser.
+          example: NXXXXXXX
+        name:
+          type: string
+          description: The title of the Fundraiser, used as its main heading.
+          example: Run for hope
+      description: Contains information about the fundraiser.
+      required:
+      - id
+      - name
+    EmbeddedSupporterResponse:
+      type: object
+      properties:
+        address:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/AddressResponse'
+        email:
+          type:
+          - string
+          - 'null'
+          description: Supporter's email address.
+          example: example@example.com
+        employer:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/EmployerResponse'
+        employment_status:
+          type:
+          - string
+          - 'null'
+          description: 'The supporter''s employment status at the time of the donation. Possible values: `employed`, `unemployed`, `retired`. Returns `null` if not collected. Only collected for US political organizations.'
+          enum:
+          - employed
+          - unemployed
+          - retired
+          example: employed
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Supporter's first name.
+          example: Alex
+        id:
+          type: string
+          description: Unique supporter identifier.
+          example: SXXXXXXXX
+        language:
+          type: string
+          enum:
+          - en-US
+          - en-GB
+          - en-CA
+          - fr-CA
+          - fr-FR
+          - es
+          - nl
+          - 'no'
+          - de
+          - de-x-informal
+          - fi-FI
+          - ar-001
+          - sv
+          - it
+          - pt-PT
+          - pt-BR
+          - zh-CN
+          - zh-TW
+          - ja
+          - ko
+          - hu
+          - da
+          - ru-RU
+          - es-US
+          - pl-PL
+          - he
+          description: Supporter's locale.
+          example: en-CA
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Supporter's last name.
+          example: Garcia
+        occupation:
+          type:
+          - string
+          - 'null'
+          description: The supporter's occupation at the time of the donation. Returns `null` if not collected or if employment status is `unemployed` or `retired`. Max 200 characters.
+          example: Software Engineer
+        phone:
+          type:
+          - string
+          - 'null'
+          description: Supporter's phone number.
+          example: +1 (111) 111111
+        title:
+          type:
+          - string
+          - 'null'
+          description: Supporter's title. For organizations in Germany and Austria, any value up to 100 characters. Returns `null` if empty.
+          example: mr
+      description: Represents the supporter data as displayed on the Donation page in your Dashboard.
+      required:
+      - id
+      - email
+      - first_name
+      - last_name
+      - title
+      - phone
+      - employer
+      - employment_status
+      - occupation
+      - address
+      - language
+    TributeResponse:
+      type: object
+      properties:
+        honoree:
+          type: string
+          description: Name of the person honored or remembered.
+          example: Zhang Wei
+        id:
+          type: string
+          description: Unique tribute identifier.
+          example: TXXXXXXX
+        sharing:
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/TributeSharingResponse'
+        type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - in_honor
+          - in_memory
+          description: Tribute type.
+          example: in_honor
+      description: Provides information about the tribute.
+      required:
+      - id
+      - type
+      - honoree
+      - sharing
+    BenefitSelectedResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Benefit code, as set in the Dashboard.
+          example: TSHIRT-001
+        fair_market_value:
+          type: string
+          description: Fair market value (FMV) at the time of payment. If an option was selected, this is the value of that option. Displayed in the organization’s default currency.
+          example: '25.99'
+        fair_market_value_currency:
+          type: string
+          enum:
+          - shp
+          - eur
+          - aed
+          - afn
+          - xcd
+          - all
+          - amd
+          - aoa
+          - ars
+          - usd
+          - aud
+          - ang
+          - xcg
+          - awg
+          - azn
+          - bam
+          - bbd
+          - inr
+          - pkr
+          - bdt
+          - xof
+          - bgn
+          - bhd
+          - bif
+          - bmd
+          - myr
+          - bnd
+          - bob
+          - brl
+          - bsd
+          - btn
+          - nok
+          - zar
+          - bwp
+          - byn
+          - bzd
+          - cad
+          - cdf
+          - xaf
+          - chf
+          - nzd
+          - clp
+          - cny
+          - cop
+          - crc
+          - cve
+          - czk
+          - djf
+          - dkk
+          - dop
+          - dzd
+          - egp
+          - mad
+          - etb
+          - fjd
+          - fkp
+          - jpy
+          - gbp
+          - gel
+          - ghs
+          - gip
+          - gmd
+          - gnf
+          - gtq
+          - gyd
+          - hkd
+          - hnl
+          - hrk
+          - htg
+          - huf
+          - idr
+          - ils
+          - isk
+          - jmd
+          - jod
+          - kes
+          - kgs
+          - khr
+          - kmf
+          - krw
+          - kwd
+          - kyd
+          - kzt
+          - lak
+          - lbp
+          - lkr
+          - lrd
+          - lsl
+          - mdl
+          - mga
+          - mkd
+          - mmk
+          - mnt
+          - mop
+          - mro
+          - mur
+          - mvr
+          - mwk
+          - mxn
+          - mzn
+          - nad
+          - xpf
+          - ngn
+          - nio
+          - sek
+          - npr
+          - omr
+          - pab
+          - pen
+          - pgk
+          - php
+          - pln
+          - pyg
+          - qar
+          - ron
+          - rsd
+          - rub
+          - rwf
+          - sar
+          - sbd
+          - scr
+          - sgd
+          - sll
+          - sle
+          - sos
+          - srd
+          - std
+          - svc
+          - szl
+          - thb
+          - tjs
+          - tnd
+          - top
+          - try
+          - ttd
+          - twd
+          - tzs
+          - uah
+          - uyu
+          - uzs
+          - vnd
+          - vuv
+          - wst
+          - yer
+          - zmw
+          - btc
+          - eth
+          - usdt
+          - usdc
+          - sol
+          - dot
+          - doge
+          - shib
+          - ltc
+          - bch
+          - xtz
+          - fil
+          - ftm
+          - gala
+          - paxg
+          - zec
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html) of the fair market value (FMV) currency, in lowercase.
+          example: usd
+        id:
+          type: string
+          description: Unique identifier for the benefit.
+          example: GXXXXXXX
+        name:
+          type: string
+          description: Benefit name, as set in the Dashboard.
+          example: T-shirt
+        option:
+          description: Selected benefit option.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/BenefitOption'
+        shipping:
+          description: Shipping details for the benefit.
+          type:
+          - object
+          - 'null'
+          allOf:
+          - $ref: '#/components/schemas/BenefitShipping'
+        state:
+          type: string
+          enum:
+          - selected
+          description: The supporter selected the benefit.
+      description: Benefit was selected by the supporter.
+      required:
+      - id
+      - state
+      - code
+      - name
+      - fair_market_value
+      - fair_market_value_currency
+      - option
+      - shipping
+    DesignationResponse:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Designation code.
+          example: Code-1
+        id:
+          type: string
+          description: Unique designation identifier.
+          example: EXXXXXXX
+        name:
+          type:
+          - string
+          - 'null'
+          description: Designation name.
+          example: My Designation
+      description: Contains information about the designation.
+      required:
+      - id
+      - code
+      - name
+    CreditCardResponse:
+      type: object
+      properties:
+        exp_month:
+          type:
+          - string
+          - 'null'
+          description: Two-digit expiration month (`01` to `12`).
+          example: '12'
+        exp_year:
+          type:
+          - string
+          - 'null'
+          description: Four-digit expiration year.
+          example: '2023'
+        last4:
+          type:
+          - string
+          - 'null'
+          description: Last four digits of the credit card number.
+          example: '1234'
+        type:
+          type:
+          - string
+          - 'null'
+          description: 'Credit card type. Possible values: `Visa`, `MasterCard`, `American Express`, `Diners Club`, `Discover`, `JCB`, `UnionPay`, `Cartes Bancaires`, `Unknown`.'
+          example: Visa
+      description: Contains information about the credit card used for the payment.
+      required:
+      - last4
+      - exp_month
+      - exp_year
+      - type
+    BenefitOption:
+      type: object
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+          description: Code of the selected option.
+          example: SIZE-M
+        name:
+          type: string
+          description: Name of the selected option.
+          example: Size
+        value:
+          type: string
+          description: Value of the selected option.
+          example: M
+      description: Benefit option selected by the supporter.
+      required:
+      - name
+      - value
+      - code
+    BenefitShownNotSelectedResponse:
+      type: object
+      properties:
+        state:
+          type: string
+          enum:
+          - shown_not_selected
+          description: The benefit was shown to the supporter, who did not select it.
+      description: Benefit was displayed to the supporter but not selected.
+      required:
+      - state
   securitySchemes:
-    bearerAuth:
-      type: http
+    bearer:
       scheme: bearer
-      description: API key created in the dashboard under Settings > API keys, sent as a Bearer token.
+      bearerFormat: API key
+      type: http
