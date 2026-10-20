@@ -59,3 +59,75 @@ tool_quality:
   scored: false
   note: Facts from the saved tools/list capture (mcp_tool_quality.py); recorded, not scored. Checks learned
     from Glimind's agent-readiness audit.
+tools:
+- name: get_organizations
+  description: 'Find a nonprofit to donate to by name. Pass only the organization''s name as the donor
+    gave it, never the donor''s message or the conversation. Start here whenever the donor names an organization,
+    then call get_campaigns with the match — do not look a named organization up through search_campaigns_by_intent.
+    Matches nonprofits that opted in to donations through AI assistants by name. Returns up to 5 organizations;
+    an empty list means no match. If more than one could be the organization the donor means, let the
+    donor choose rather than assuming. No match is not an error: widen the query or ask the donor to name
+    the organization; if the network has no match, tell the donor there is none.'
+- name: get_campaigns
+  description: List an organization's campaigns that accept donations, with amounts and links. Call it
+    with the organizationId from get_organizations; results are ranked by activity and carry the donor-facing
+    title and description, a ready donation URL, and the one-time donation conditions. When more than
+    one campaign could fit the donor's intent, let the donor choose rather than picking one for them.
+    Only campaigns that accept one-time donations are returned. Show the donor every suggested amount
+    exactly as returned, in the campaign's currency, and pass the donation URL on exactly as returned,
+    including its query string — never shorten it. Show amount descriptions as-is when present and never
+    invent one. Returns up to 25 campaigns; an unknown organizationId is an error, not an empty list.
+- name: search_campaigns_by_intent
+  description: Find nonprofit campaigns to donate to by cause when no organization is named. Call it only
+    when the donor asks to donate to a cause; pass a few English keywords naming that cause, never the
+    donor's message or the conversation. If the donor did name an organization, use get_organizations
+    and then get_campaigns instead — this is a keyword search across the whole network, not a lookup by
+    organization name. Each result carries the same fields as get_campaigns plus the organization running
+    it; name that organization beside every campaign you offer. Pass the donation URL on exactly as returned,
+    including its query string — never shorten it. Results are live campaigns of nonprofits that opted
+    in to donations through AI assistants and can take payment; the search has no location filter, so
+    a campaign from another country is still a valid offer. Show amount descriptions as-is when present
+    and never invent one. Only campaigns that accept one-time donations are returned.
+- name: create_donation_session
+  description: Create a donation session the moment the donor picks a campaign. Only campaignId is required;
+    the organization is derived from the campaign. Pass amount and currency only when the donor explicitly
+    stated them — never a campaign default. Frequency is always "once", the only supported value, and
+    has to be set explicitly before confirmation. Creating a session charges nothing. The response reports
+    the session state and what is still missing before payment.
+- name: update_donation_session
+  description: Record the donation conditions as the donor states them. Fill in amount, currency, and
+    the cover-fee decision as the donor explicitly stated them — never a campaign default. The frequency
+    is always "once", the only supported value; set it here if it was not set at creation. Once the session
+    state reports feeAmount, show it to the donor and record their answer via coverFee. Values are validated
+    against the campaign and the response reports whether everything is collected for payment. Updating
+    a session charges nothing.
+- name: confirm_donation_session
+  description: Finalize the collected donation details and retrieve everything needed to pay. Call this
+    once the donation conditions are collected — paymentMethod is the only entry left in the session's
+    "missing" list. Returns the session state plus paymentRequirements for the payment step; its amount
+    is in minor currency units and includes the fee when the donor covers it. Confirming charges nothing;
+    only attach_payment_token completes the payment, and only with a token the donor approved. The agent
+    never authorizes the payment. The donor approves the spend in Stripe Link's own interface, which the
+    donor controls; the agent only forwards the token that approval produced. checkoutUrl is a fallback
+    for when no wallet is available.
+- name: get_donation_session_status
+  description: Check a donation session's payment status and what is still missing. The payment status
+    is pending, paid, or failed. paymentMethod is recorded asynchronously and may still show as missing
+    right after a charge. After payment has been attached, poll this tool until paymentStatus is "paid"
+    (donation completed) or "failed" — do not report the donation as done until then. If paymentStatus
+    is "failed", offer the donor a retry through the agent or, as a fallback, the session's checkoutUrl.
+    Report the outcome from the session state only; never invent amounts, unit costs, or delivery promises.
+- name: attach_payment_token
+  description: 'Complete a donation the donor approved in Stripe Link with the returned token. The spt
+    is a shared payment token issued by Stripe Link for paymentRequirements.amount in paymentRequirements.currency,
+    approved by the donor. The agent never authorizes the payment. The donor approves the spend in Stripe
+    Link''s own interface, which the donor controls; the agent only forwards the token that approval produced.
+    Never construct a token yourself or use raw card details. Call only after confirm_donation_session
+    succeeded. Never hand the donor a payment approval link that is more than ten minutes old — create
+    a fresh spend request instead. Show the donor the full summary (organization, campaign, amount, currency,
+    frequency, and the total from totalAmount) before this call. A donation session can be paid only once,
+    so a second donation needs a new session. A successful result is not proof of payment: it carries
+    no payment status. If this call errors or times out without returning, read get_donation_session_status
+    before retrying — the payment may already have gone through — and retry with the same idempotencyKey
+    only once paymentStatus is "failed".'
+tools_count: 8
