@@ -1,0 +1,964 @@
+{
+  "endpoint": "https://mcp.fundraiseup.com/mcp",
+  "captured": "2026-10-20",
+  "method": "initialize + tools/list (anonymous, no tool called; roadmap#992)",
+  "protocol_version": "2025-06-18",
+  "server_info": {
+    "name": "fundraiseup-public-mcp",
+    "title": "Fundraise Up for Donors",
+    "version": "1.0.0",
+    "websiteUrl": "https://fundraiseup.com",
+    "icons": [
+      {
+        "src": "https://fundraiseup.com/apple-touch-icon.png",
+        "mimeType": "image/png",
+        "sizes": [
+          "180x180"
+        ]
+      }
+    ]
+  },
+  "result": {
+    "tools": [
+      {
+        "name": "get_organizations",
+        "description": "Find a nonprofit to donate to by name. Pass only the organization's name as the donor gave it, never the donor's message or the conversation. Start here whenever the donor names an organization, then call get_campaigns with the match — do not look a named organization up through search_campaigns_by_intent. Matches nonprofits that opted in to donations through AI assistants by name. Returns up to 5 organizations; an empty list means no match. If more than one could be the organization the donor means, let the donor choose rather than assuming. No match is not an error: widen the query or ask the donor to name the organization; if the network has no match, tell the donor there is none.",
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "maxLength": 100,
+              "description": "Name of the organization the donor named, for example \"Red Cross\"; only the name, never the donor's message, the conversation, or personal details"
+            },
+            "limit": {
+              "default": 5,
+              "description": "Maximum number of organizations to return",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            }
+          },
+          "required": [
+            "query"
+          ]
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false,
+          "title": "Find organizations"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        },
+        "_meta": {
+          "securitySchemes": [
+            {
+              "type": "noauth"
+            }
+          ]
+        },
+        "outputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "organizations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "organizationId": {
+                    "type": "string",
+                    "description": "Unique organization identifier"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Organization name"
+                  },
+                  "nonProfitName": {
+                    "description": "Legal non-profit name",
+                    "type": "string"
+                  },
+                  "website": {
+                    "description": "Organization website URL",
+                    "type": "string"
+                  },
+                  "description": {
+                    "description": "Agentic Giving description provided by the organization",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "organizationId",
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "organizations"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "get_campaigns",
+        "description": "List an organization's campaigns that accept donations, with amounts and links. Call it with the organizationId from get_organizations; results are ranked by activity and carry the donor-facing title and description, a ready donation URL, and the one-time donation conditions. When more than one campaign could fit the donor's intent, let the donor choose rather than picking one for them. Only campaigns that accept one-time donations are returned. Show the donor every suggested amount exactly as returned, in the campaign's currency, and pass the donation URL on exactly as returned, including its query string — never shorten it. Show amount descriptions as-is when present and never invent one. Returns up to 25 campaigns; an unknown organizationId is an error, not an empty list.",
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "organizationId": {
+              "type": "string",
+              "description": "Organization identifier as returned by get_organizations, or published in the organization's agentic-giving.md"
+            },
+            "limit": {
+              "default": 25,
+              "description": "Maximum number of campaigns to return",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 25
+            }
+          },
+          "required": [
+            "organizationId"
+          ]
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false,
+          "title": "List campaigns of an organization"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        },
+        "_meta": {
+          "securitySchemes": [
+            {
+              "type": "noauth"
+            }
+          ]
+        },
+        "outputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "campaigns": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "campaignId": {
+                    "type": "string",
+                    "description": "Unique campaign identifier"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Donor-facing campaign title"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Donor-facing campaign description, plain text"
+                  },
+                  "donationUrl": {
+                    "description": "Ready-to-use donation page link for this campaign, or null when the campaign has no reachable donation page (use the donation-session flow instead)",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "defaultCurrency": {
+                    "type": "string",
+                    "description": "Default donation currency"
+                  },
+                  "currencyEnabled": {
+                    "type": "boolean",
+                    "description": "Whether supporters may switch the donation currency"
+                  },
+                  "frequencies": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "amountOptions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "amount": {
+                                "type": "number",
+                                "description": "Suggested donation amount in major currency units (e.g. 25 for $25)"
+                              },
+                              "description": {
+                                "description": "Organization-set custom description for this amount, when configured",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "amount"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "minAmount": {
+                          "description": "Minimum donation amount in major currency units (e.g. 25 for $25)",
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "description": "Donation conditions; only the one-time entry is exposed and amounts are in major currency units (e.g. 25 for $25)"
+                  }
+                },
+                "required": [
+                  "campaignId",
+                  "title",
+                  "description",
+                  "donationUrl",
+                  "defaultCurrency",
+                  "currencyEnabled",
+                  "frequencies"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "campaigns"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "search_campaigns_by_intent",
+        "description": "Find nonprofit campaigns to donate to by cause when no organization is named. Call it only when the donor asks to donate to a cause; pass a few English keywords naming that cause, never the donor's message or the conversation. If the donor did name an organization, use get_organizations and then get_campaigns instead — this is a keyword search across the whole network, not a lookup by organization name. Each result carries the same fields as get_campaigns plus the organization running it; name that organization beside every campaign you offer. Pass the donation URL on exactly as returned, including its query string — never shorten it. Results are live campaigns of nonprofits that opted in to donations through AI assistants and can take payment; the search has no location filter, so a campaign from another country is still a valid offer. Show amount descriptions as-is when present and never invent one. Only campaigns that accept one-time donations are returned.",
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "intent": {
+              "type": "string",
+              "maxLength": 100,
+              "description": "A few English keywords naming the cause, for example \"clean water\" or \"animal shelter\"; never the donor's message, the conversation, or personal details"
+            },
+            "limit": {
+              "default": 10,
+              "description": "Maximum number of campaigns to return",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "required": [
+            "intent"
+          ]
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false,
+          "title": "Search campaigns by cause"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        },
+        "_meta": {
+          "securitySchemes": [
+            {
+              "type": "noauth"
+            }
+          ]
+        },
+        "outputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "campaigns": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "campaignId": {
+                    "type": "string",
+                    "description": "Unique campaign identifier"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Donor-facing campaign title"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Donor-facing campaign description, plain text"
+                  },
+                  "donationUrl": {
+                    "description": "Ready-to-use donation page link for this campaign, or null when the campaign has no reachable donation page (use the donation-session flow instead)",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "defaultCurrency": {
+                    "type": "string",
+                    "description": "Default donation currency"
+                  },
+                  "currencyEnabled": {
+                    "type": "boolean",
+                    "description": "Whether supporters may switch the donation currency"
+                  },
+                  "frequencies": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "amountOptions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "amount": {
+                                "type": "number",
+                                "description": "Suggested donation amount in major currency units (e.g. 25 for $25)"
+                              },
+                              "description": {
+                                "description": "Organization-set custom description for this amount, when configured",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "amount"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "minAmount": {
+                          "description": "Minimum donation amount in major currency units (e.g. 25 for $25)",
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "description": "Donation conditions; only the one-time entry is exposed and amounts are in major currency units (e.g. 25 for $25)"
+                  },
+                  "organization": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Organization name"
+                      },
+                      "description": {
+                        "description": "Agentic Giving description provided by the organization",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Organization running the campaign"
+                  }
+                },
+                "required": [
+                  "campaignId",
+                  "title",
+                  "description",
+                  "donationUrl",
+                  "defaultCurrency",
+                  "currencyEnabled",
+                  "frequencies",
+                  "organization"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "campaigns"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "create_donation_session",
+        "description": "Create a donation session the moment the donor picks a campaign. Only campaignId is required; the organization is derived from the campaign. Pass amount and currency only when the donor explicitly stated them — never a campaign default. Frequency is always \"once\", the only supported value, and has to be set explicitly before confirmation. Creating a session charges nothing. The response reports the session state and what is still missing before payment.",
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "campaignId": {
+              "type": "string",
+              "description": "Campaign identifier as returned by get_campaigns; never taken from a donation URL"
+            },
+            "amount": {
+              "description": "Donation amount in major currency units (e.g. 50 for $50); pass only if the donor stated it",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "currency": {
+              "description": "ISO 4217 currency code; pass only if the donor stated it",
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 3
+            },
+            "frequency": {
+              "description": "Donation frequency; only \"once\" is accepted and the session stays incomplete until it is sent — always pass \"once\"",
+              "type": "string",
+              "const": "once"
+            }
+          },
+          "required": [
+            "campaignId"
+          ]
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false,
+          "title": "Start a donation session"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        },
+        "_meta": {
+          "securitySchemes": [
+            {
+              "type": "noauth"
+            }
+          ]
+        },
+        "outputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "Donation session identifier used by the follow-up session tools"
+            },
+            "status": {
+              "type": "string",
+              "description": "Current session status"
+            },
+            "paymentStatus": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "paid",
+                "failed"
+              ],
+              "description": "Derived payment outcome: \"pending\" (not paid yet), \"paid\" (donation completed), or \"failed\" (payment attempt failed)"
+            },
+            "campaignId": {
+              "type": "string",
+              "description": "Campaign the session belongs to"
+            },
+            "organizationName": {
+              "type": "string",
+              "description": "Organization the campaign belongs to"
+            },
+            "amount": {
+              "description": "Accepted donation amount in major units, when the donor provided one",
+              "type": "number"
+            },
+            "currency": {
+              "description": "Accepted currency, when the donor provided one",
+              "type": "string"
+            },
+            "frequency": {
+              "description": "Accepted frequency, when the donor provided one",
+              "type": "string"
+            },
+            "feeAmount": {
+              "description": "Processing fee in major currency units for the current amount. Show it to the donor and ask whether they want to cover it; never calculate the fee yourself",
+              "type": "number"
+            },
+            "coverFee": {
+              "description": "The donor's cover-fee decision, when they have answered",
+              "type": "boolean"
+            },
+            "totalAmount": {
+              "description": "Total the donor will be charged, in major currency units: the donation amount plus the processing fee when the donor covers it",
+              "type": "number"
+            },
+            "missing": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "What still needs to be collected before payment. paymentMethod is supplied by attach_payment_token with a token the donor approved in Stripe Link, never by asking the donor for card details"
+            }
+          },
+          "required": [
+            "sessionId",
+            "status",
+            "paymentStatus",
+            "campaignId",
+            "organizationName",
+            "missing"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "update_donation_session",
+        "description": "Record the donation conditions as the donor states them. Fill in amount, currency, and the cover-fee decision as the donor explicitly stated them — never a campaign default. The frequency is always \"once\", the only supported value; set it here if it was not set at creation. Once the session state reports feeAmount, show it to the donor and record their answer via coverFee. Values are validated against the campaign and the response reports whether everything is collected for payment. Updating a session charges nothing.",
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "Donation session identifier as returned by create_donation_session"
+            },
+            "amount": {
+              "description": "Donation amount in major currency units (e.g. 50 for $50); pass only if the donor stated it",
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "currency": {
+              "description": "ISO 4217 currency code; pass only if the donor stated it",
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 3
+            },
+            "frequency": {
+              "description": "Donation frequency; only \"once\" is accepted and the session stays incomplete until it is sent — always pass \"once\"",
+              "type": "string",
+              "const": "once"
+            },
+            "coverFee": {
+              "description": "Whether the donor covers the processing fee. Ask after the session state reports feeAmount; pass only the donor's explicit yes/no answer",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "sessionId"
+          ]
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false,
+          "title": "Record the donation conditions",
+          "idempotentHint": true
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        },
+        "_meta": {
+          "securitySchemes": [
+            {
+              "type": "noauth"
+            }
+          ]
+        },
+        "outputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "Donation session identifier used by the follow-up session tools"
+            },
+            "status": {
+              "type": "string",
+              "description": "Current session status"
+            },
+            "paymentStatus": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "paid",
+                "failed"
+              ],
+              "description": "Derived payment outcome: \"pending\" (not paid yet), \"paid\" (donation completed), or \"failed\" (payment attempt failed)"
+            },
+            "campaignId": {
+              "type": "string",
+              "description": "Campaign the session belongs to"
+            },
+            "organizationName": {
+              "type": "string",
+              "description": "Organization the campaign belongs to"
+            },
+            "amount": {
+              "description": "Accepted donation amount in major units, when the donor provided one",
+              "type": "number"
+            },
+            "currency": {
+              "description": "Accepted currency, when the donor provided one",
+              "type": "string"
+            },
+            "frequency": {
+              "description": "Accepted frequency, when the donor provided one",
+              "type": "string"
+            },
+            "feeAmount": {
+              "description": "Processing fee in major currency units for the current amount. Show it to the donor and ask whether they want to cover it; never calculate the fee yourself",
+              "type": "number"
+            },
+            "coverFee": {
+              "description": "The donor's cover-fee decision, when they have answered",
+              "type": "boolean"
+            },
+            "totalAmount": {
+              "description": "Total the donor will be charged, in major currency units: the donation amount plus the processing fee when the donor covers it",
+              "type": "number"
+            },
+            "missing": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "What still needs to be collected before payment. paymentMethod is supplied by attach_payment_token with a token the donor approved in Stripe Link, never by asking the donor for card details"
+            }
+          },
+          "required": [
+            "sessionId",
+            "status",
+            "paymentStatus",
+            "campaignId",
+            "organizationName",
+            "missing"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "confirm_donation_session",
+        "description": "Finalize the collected donation details and retrieve everything needed to pay. Call this once the donation conditions are collected — paymentMethod is the only entry left in the session's \"missing\" list. Returns the session state plus paymentRequirements for the payment step; its amount is in minor currency units and includes the fee when the donor covers it. Confirming charges nothing; only attach_payment_token completes the payment, and only with a token the donor approved. The agent never authorizes the payment. The donor approves the spend in Stripe Link's own interface, which the donor controls; the agent only forwards the token that approval produced. checkoutUrl is a fallback for when no wallet is available.",
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "Donation session identifier as returned by create_donation_session"
+            }
+          },
+          "required": [
+            "sessionId"
+          ]
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false,
+          "title": "Confirm the donation details",
+          "idempotentHint": true
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        },
+        "_meta": {
+          "securitySchemes": [
+            {
+              "type": "noauth"
+            }
+          ]
+        },
+        "outputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "Donation session identifier used by the follow-up session tools"
+            },
+            "status": {
+              "type": "string",
+              "description": "Current session status"
+            },
+            "paymentStatus": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "paid",
+                "failed"
+              ],
+              "description": "Derived payment outcome: \"pending\" (not paid yet), \"paid\" (donation completed), or \"failed\" (payment attempt failed)"
+            },
+            "campaignId": {
+              "type": "string",
+              "description": "Campaign the session belongs to"
+            },
+            "organizationName": {
+              "type": "string",
+              "description": "Organization the campaign belongs to"
+            },
+            "amount": {
+              "description": "Accepted donation amount in major units, when the donor provided one",
+              "type": "number"
+            },
+            "currency": {
+              "description": "Accepted currency, when the donor provided one",
+              "type": "string"
+            },
+            "frequency": {
+              "description": "Accepted frequency, when the donor provided one",
+              "type": "string"
+            },
+            "feeAmount": {
+              "description": "Processing fee in major currency units for the current amount. Show it to the donor and ask whether they want to cover it; never calculate the fee yourself",
+              "type": "number"
+            },
+            "coverFee": {
+              "description": "The donor's cover-fee decision, when they have answered",
+              "type": "boolean"
+            },
+            "totalAmount": {
+              "description": "Total the donor will be charged, in major currency units: the donation amount plus the processing fee when the donor covers it",
+              "type": "number"
+            },
+            "missing": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "What still needs to be collected before payment. paymentMethod is supplied by attach_payment_token with a token the donor approved in Stripe Link, never by asking the donor for card details"
+            },
+            "checkoutUrl": {
+              "description": "Prefilled donation page link carrying the collected amount, currency, and frequency, for the donor to finish the donation themselves only when no wallet is available through Stripe Link or the wallet flow cannot finish. Returned from confirm_donation_session onward; absent when the campaign has no reachable donation page.",
+              "type": "string"
+            },
+            "paymentRequirements": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "Exact amount to charge, in minor currency units (e.g. 2500 for $25.00), including the processing fee when the donor covers it"
+                },
+                "currency": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 3,
+                  "description": "ISO 4217 currency the donation will be charged in (campaign default when the donor did not state one)"
+                },
+                "livemode": {
+                  "type": "boolean",
+                  "description": "true for a live-mode payment, false for test mode"
+                },
+                "networkId": {
+                  "description": "Merchant Stripe profile id a shared payment token (SPT) must be scoped to. null when this deployment cannot accept SPTs",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "amount",
+                "currency",
+                "livemode",
+                "networkId"
+              ],
+              "additionalProperties": false,
+              "description": "Everything needed to pay for the confirmed session: how much, in what currency, livemode, and the merchant networkId an SPT must be scoped to"
+            }
+          },
+          "required": [
+            "sessionId",
+            "status",
+            "paymentStatus",
+            "campaignId",
+            "organizationName",
+            "missing",
+            "paymentRequirements"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "get_donation_session_status",
+        "description": "Check a donation session's payment status and what is still missing. The payment status is pending, paid, or failed. paymentMethod is recorded asynchronously and may still show as missing right after a charge. After payment has been attached, poll this tool until paymentStatus is \"paid\" (donation completed) or \"failed\" — do not report the donation as done until then. If paymentStatus is \"failed\", offer the donor a retry through the agent or, as a fallback, the session's checkoutUrl. Report the outcome from the session state only; never invent amounts, unit costs, or delivery promises.",
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "Donation session identifier as returned by create_donation_session"
+            }
+          },
+          "required": [
+            "sessionId"
+          ]
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false,
+          "title": "Check the donation session status"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        },
+        "_meta": {
+          "securitySchemes": [
+            {
+              "type": "noauth"
+            }
+          ]
+        },
+        "outputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "Donation session identifier used by the follow-up session tools"
+            },
+            "status": {
+              "type": "string",
+              "description": "Current session status"
+            },
+            "paymentStatus": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "paid",
+                "failed"
+              ],
+              "description": "Derived payment outcome: \"pending\" (not paid yet), \"paid\" (donation completed), or \"failed\" (payment attempt failed)"
+            },
+            "campaignId": {
+              "type": "string",
+              "description": "Campaign the session belongs to"
+            },
+            "organizationName": {
+              "type": "string",
+              "description": "Organization the campaign belongs to"
+            },
+            "amount": {
+              "description": "Accepted donation amount in major units, when the donor provided one",
+              "type": "number"
+            },
+            "currency": {
+              "description": "Accepted currency, when the donor provided one",
+              "type": "string"
+            },
+            "frequency": {
+              "description": "Accepted frequency, when the donor provided one",
+              "type": "string"
+            },
+            "feeAmount": {
+              "description": "Processing fee in major currency units for the current amount. Show it to the donor and ask whether they want to cover it; never calculate the fee yourself",
+              "type": "number"
+            },
+            "coverFee": {
+              "description": "The donor's cover-fee decision, when they have answered",
+              "type": "boolean"
+            },
+            "totalAmount": {
+              "description": "Total the donor will be charged, in major currency units: the donation amount plus the processing fee when the donor covers it",
+              "type": "number"
+            },
+            "missing": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "What still needs to be collected before payment. paymentMethod is supplied by attach_payment_token with a token the donor approved in Stripe Link, never by asking the donor for card details"
+            },
+            "checkoutUrl": {
+              "description": "Prefilled donation page link carrying the collected amount, currency, and frequency, for the donor to finish the donation themselves only when no wallet is available through Stripe Link or the wallet flow cannot finish. Returned from confirm_donation_session onward; absent when the campaign has no reachable donation page.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "sessionId",
+            "status",
+            "paymentStatus",
+            "campaignId",
+            "organizationName",
+            "missing"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "attach_payment_token",
+        "description": "Complete a donation the donor approved in Stripe Link with the returned token. The spt is a shared payment token issued by Stripe Link for paymentRequirements.amount in paymentRequirements.currency, approved by the donor. The agent never authorizes the payment. The donor approves the spend in Stripe Link's own interface, which the donor controls; the agent only forwards the token that approval produced. Never construct a token yourself or use raw card details. Call only after confirm_donation_session succeeded. Never hand the donor a payment approval link that is more than ten minutes old — create a fresh spend request instead. Show the donor the full summary (organization, campaign, amount, currency, frequency, and the total from totalAmount) before this call. A donation session can be paid only once, so a second donation needs a new session. A successful result is not proof of payment: it carries no payment status. If this call errors or times out without returning, read get_donation_session_status before retrying — the payment may already have gone through — and retry with the same idempotencyKey only once paymentStatus is \"failed\".",
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Donation session identifier as returned by create_donation_session"
+            },
+            "spt": {
+              "description": "Shared payment token (SPT) that Stripe Link returns once the donor approves the spend request, scoped to paymentRequirements.networkId from confirm_donation_session; raw card credentials are never accepted",
+              "type": "string",
+              "minLength": 1
+            },
+            "idempotencyKey": {
+              "description": "Key identifying this charge attempt, passed to the payment provider. Set one before the first call and reuse it on every retry of the same donation; a new key does not make a second charge possible, since the session can be charged only once",
+              "type": "string"
+            }
+          },
+          "required": [
+            "sessionId"
+          ]
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "openWorldHint": true,
+          "title": "Complete the approved donation"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        },
+        "_meta": {
+          "securitySchemes": [
+            {
+              "type": "noauth"
+            }
+          ]
+        },
+        "outputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "donations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Donation identifiers created by the completed payment"
+            }
+          },
+          "required": [
+            "donations"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ]
+  }
+}
