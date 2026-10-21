@@ -28,3 +28,16 @@
     builder: unknown (not in the directory record)
   status: not-a-workflow
   arazzo: null
+- slug: fundraiseup-salesforce-commerce-cloud-own
+  label: Salesforce Commerce Cloud (own)
+  partner: salesforce-commerce-cloud
+  partner_name: Salesforce Commerce Cloud (own)
+  category: paymentsProcessing, dashboardsAndReports, campaignManagement
+  type: marketplace
+  marketplace: own
+  channel: partner-built
+  evidence: https://appexchange.salesforce.com/appxListingDetail?listingId=bee72b5c-36a6-4ec8-b0b0-322875c7826d
+  source: edge
+  relationship: platform-app
+  status: not-a-workflow
+  arazzo: null
