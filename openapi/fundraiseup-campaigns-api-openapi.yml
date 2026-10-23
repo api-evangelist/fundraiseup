@@ -889,3 +889,9 @@ components:
       scheme: bearer
       bearerFormat: API key
       type: http
+x-provenance:
+  method: harvested
+  publisher: Fundraise Up
+  source: https://api.fundraiseup.com/v1/openapi.json
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
