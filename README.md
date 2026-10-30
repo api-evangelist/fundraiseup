@@ -1,4 +1,4 @@
-# Fundraise Up (fundraiseup)
+# Fundraise Up
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -64,94 +64,133 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Fundraise Up is an online donation and fundraising platform for nonprofits that optimizes the digital giving experience to lift conversion and recurring revenue. Its REST API gives programmatic access to fundraising data - donations, recurring plans, supporters (donors), and an events audit log - so organizations can process offline and non-digital donations through their Fundraise Up account, combine them with online giving, and sync everything to CRMs, BI tools, and data warehouses.
+Fundraise Up is an online donation and fundraising platform for nonprofits that optimizes the digital giving experience to increase conversion and recurring revenue. Its REST API gives programmatic access to fundraising data - donations, recurring plans, supporters (donors), and an events audit log - so organizations can process offline and non-digital donations through their Fundraise Up account, combine them with online giving, and sync everything to CRMs, BI tools, and data warehouses. The API is resource-oriented, uses JSON-encoded request bodies, and authenticates with an API key over HTTP Bearer. Base URL is https://api.fundraiseup.com/v1.
 
-**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/fundraiseup/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/fundraiseup/refs/heads/main/apis.yml)
+**Areas:** Fundraising · Donations · Non-Profit · Payments · Recurring Giving · Donor Management
 
-## Access Model
+## Fundraise Up on APIs.io
 
-The REST API is available to Fundraise Up account holders. There is **no separate API fee and no tiered software plans** - Fundraise Up's business model is a single transaction-based platform fee taken as a percentage of each processed donation (a standard **4%**, and **5%** for cryptocurrency), with no setup fees, no monthly fees, and no contracts. Payment processor fees (Stripe, PayPal, Gemini) are charged separately; donors can opt to cover fees at checkout, which most do, lowering the organization's effective net cost.
+Everything profiled for Fundraise Up is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/fundraiseup/](https://apis.io/providers/fundraiseup/)** — or go straight to one of the APIs or properties below.
 
-- **Base URL:** `https://api.fundraiseup.com/v1`
-- **Authentication:** API key created in the dashboard under **Settings > API keys**, sent as an HTTP **Bearer** token.
-- **Format:** Resource-oriented JSON. Request bodies are JSON with `Content-Type: application/json`.
-- **Pagination:** Cursor-based on list endpoints via `limit` (1-100, default 10), `starting_after`, and `ending_before`.
-- **Rate limits:** 8 requests/second and 128 requests/minute; exceeding either returns HTTP `429 Too Many Requests`.
-- **Update window:** Donations and recurring plans can be updated **only within 24 hours** of creation. Supporters and events are read-only.
-- **No WebSocket / no native webhooks:** The API is request/response REST. Event-based syncing is done by polling the Events resource (an audit log) or bridging through Zapier - Fundraise Up does not push events over a WebSocket or configurable webhook.
+### APIs (5)
 
-## Tags
+- [Fundraise Up Donations API](https://apis.io/apis/fundraiseup/fundraiseup-donations-api/) — One-time and recurring donations, including offline and ACH donations.
+- [Fundraise Up Donor Portal API](https://apis.io/apis/fundraiseup/fundraiseup-donor-portal-api/) — Secure access-link generation for the self-service Donor Portal.
+- [Fundraise Up Events API](https://apis.io/apis/fundraiseup/fundraiseup-events-api/) — Audit-log events across donations, recurring plans, tributes, and supporters.
+- [Fundraise Up Recurring Plans API](https://apis.io/apis/fundraiseup/fundraiseup-recurring-plans-api/) — Recurring donation plans modeling a supporter's ongoing giving.
+- [Fundraise Up Supporters API](https://apis.io/apis/fundraiseup/fundraiseup-supporters-api/) — Donor records (Fundraise Up calls donors "supporters").
 
-- Fundraising
-- Donations
-- Nonprofit
-- Payments
-- Recurring Giving
-- Donor Management
+### Published properties
 
-## Timestamps
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-- **Created:** 2026-07-05
-- **Modified:** 2026-07-05
+#### MCP servers (1)
 
-## APIs
+Model Context Protocol servers that expose the API to agents.
 
-### Fundraise Up Donations API
+- [fundraiseup](https://apis.io/servers/fundraiseup/fundraiseup/)
 
-List, create, and retrieve one-time and recurring donations, including donations collected outside the website (face-to-face, direct mail, telethons, events) and ACH US Direct Debit donations. Donations can be updated only within 24 hours of creation.
+#### Agentic access (1)
 
-- **Human URL:** [https://api.fundraiseup.com/v1/docs/](https://api.fundraiseup.com/v1/docs/)
-- **Base URL:** `https://api.fundraiseup.com/v1`
+Which operations an agent can call, which act, and which need a human in the loop.
 
-Endpoints: `GET /donations`, `POST /donations`, `GET /donations/{id}`, `POST /donations/{id}` (update within 24h).
+- [Fundraiseup Agentic Access](https://apis.io/agentic-access/fundraiseup/fundraiseup-agentic-access/)
 
-### Fundraise Up Recurring Plans API
+#### Collections (6)
 
-List, create, and retrieve recurring donation plans that model a supporter's ongoing giving schedule and terms. Like donations, recurring plans can be updated only within 24 hours of creation.
+Postman and Open Collection request collections.
 
-- **Human URL:** [https://api.fundraiseup.com/v1/docs/](https://api.fundraiseup.com/v1/docs/)
-- **Base URL:** `https://api.fundraiseup.com/v1`
+- [Fundraise Up REST API](https://apis.io/collections/fundraiseup/open-fundraiseup/)
+- [Fundraise Up REST Donations API](https://apis.io/collections/fundraiseup/open-fundraiseup-donations-api/)
+- [Fundraise Up REST Donations Donor Portal API](https://apis.io/collections/fundraiseup/open-fundraiseup-donor-portal-api/)
+- [Fundraise Up REST Donations Events API](https://apis.io/collections/fundraiseup/open-fundraiseup-events-api/)
+- [Fundraise Up REST Donations Recurring Plans API](https://apis.io/collections/fundraiseup/open-fundraiseup-recurring-plans-api/)
+- [Fundraise Up REST Donations Supporters API](https://apis.io/collections/fundraiseup/open-fundraiseup-supporters-api/)
 
-Endpoints: `GET /recurring_plans`, `POST /recurring_plans`, `GET /recurring_plans/{id}`, `POST /recurring_plans/{id}` (update within 24h).
+#### Security (2)
 
-### Fundraise Up Supporters API
+Authentication, trust centre, and vulnerability disclosure.
 
-List and retrieve supporters - the donor records holding a giver's profile and giving history. "Supporter" is the Fundraise Up term for a donor.
+- [Fundraiseup Authentication](https://apis.io/security/fundraiseup/fundraiseup-authentication/)
+- [Fundraiseup Domain Security](https://apis.io/security/fundraiseup/fundraiseup-domain-security/)
 
-- **Human URL:** [https://api.fundraiseup.com/v1/docs/](https://api.fundraiseup.com/v1/docs/)
-- **Base URL:** `https://api.fundraiseup.com/v1`
+#### Plans and pricing (1)
 
-Endpoints: `GET /supporters`, `GET /supporters/{id}`.
+Published plans, tiers and prices.
 
-### Fundraise Up Events API
+- [Fundraiseup Plans Pricing](https://apis.io/plans/fundraiseup/fundraiseup-plans-pricing/)
 
-List and retrieve audit-log events describing activity across donations, transaction attempts, recurring plans, tributes, and supporters (for example `donation.success`, `recurring_plan.activated`, `supporter.updated`). Events are pulled over REST - Fundraise Up does not push native webhooks - so consumers poll this resource to drive event-based syncing.
+#### Rate limits (1)
 
-- **Human URL:** [https://fundraiseup.com/support/api-event-types/](https://fundraiseup.com/support/api-event-types/)
-- **Base URL:** `https://api.fundraiseup.com/v1`
+Published request limits.
 
-Endpoints: `GET /events`, `GET /events/{id}`.
+- [Fundraiseup Rate Limits](https://apis.io/rate-limits/fundraiseup/fundraiseup-rate-limits/)
 
-### Fundraise Up Donor Portal Access Links API
+#### FinOps (1)
 
-Generate secure, single-use links that let a supporter open their Donor Portal - or a specific recurring plan within it - without logging in, so a nonprofit can embed self-service donor management seamlessly into its own platform.
+What the API costs to run, by operation.
 
-- **Human URL:** [https://fundraiseup.com/docs/seamless-donor-portal/](https://fundraiseup.com/docs/seamless-donor-portal/)
-- **Base URL:** `https://api.fundraiseup.com/v1`
+- [Fundraiseup Finops](https://apis.io/finops/fundraiseup/fundraiseup-finops/)
 
-Endpoints: `POST /donor_portal/access_links/supporters/{id}`, `POST /donor_portal/access_links/recurring_plans/{id}`.
+## Where to find this API
 
-## Common Properties
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
-- [LinkedIn](https://www.linkedin.com/company/fundraiseup)
 - [Website](https://fundraiseup.com)
 - [Documentation](https://fundraiseup.com/docs/)
-- [Plans](plans/fundraiseup-plans-pricing.yml)
-- [Rate Limits](rate-limits/fundraiseup-rate-limits.yml)
-- [Fin Ops](finops/fundraiseup-finops.yml)
 - [Blog](https://fundraiseup.com/blog/)
 
-## Maintainers
+## API Evangelist rating
 
-**FN:** Kin Lane
-**Email:** kin@apievangelist.com
+**Kin Score 24.7** — emerging · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 68.3 |
+| Contract quality | 45.4 |
+| Contract governance | 0.0 |
+| Operational transparency | 7.9 |
+| Developer ergonomics | 32.1 |
+| Access clarity | 5.3 |
+
+**Agent readiness 45.8** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | — |
+| MCP Server | verified |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | — |
+| OpenAPI Examples | — |
+| Rate Limit Signal | derived (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | verified |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | paginated |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 10.7** — Payments
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/fundraiseup/](https://apis.io/providers/fundraiseup/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Fundraise Up: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/fundraiseup/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
